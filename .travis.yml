@@ -1,6 +1,6 @@
 language: go
 
-dist: trusty
+dist: yakkety
 
 go:
   - 1.10.x
@@ -10,4 +10,4 @@ go_import_path: github.com/joefowler/gogetdata
 before_install:
   - sudo add-apt-repository ppa:getdata/ppa -y
   - sudo apt-get update -q
-  - sudo apt-get install -y libgetdata
+  - sudo apt-get install libgetdata -y
