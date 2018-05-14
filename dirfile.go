@@ -26,8 +26,17 @@ const RDONLY Flags = C.GD_RDONLY
 
 // RDWR open read/write
 const RDWR Flags = C.GD_RDWR
+
+// FORCEENDIAN override endianness
 const FORCEENDIAN Flags = C.GD_FORCE_ENDIAN
+
+// BIGENDIAN assume big-endian raw data
 const BIGENDIAN Flags = C.GD_BIG_ENDIAN
+
+// LITTLEENDIAN assume big-endian raw data
+const LITTLEENDIAN Flags = C.GD_LITTLE_ENDIAN
+
+// CREAT create dirfile if it doesn't exist
 const CREAT Flags = C.GD_CREAT
 const EXCL Flags = C.GD_EXCL
 const TRUNC Flags = C.GD_TRUNC
