@@ -38,9 +38,16 @@ const LITTLEENDIAN Flags = C.GD_LITTLE_ENDIAN
 
 // CREAT create dirfile if it doesn't exist
 const CREAT Flags = C.GD_CREAT
+
+// EXCL forces creation of dirfile (and fail if it exists)
 const EXCL Flags = C.GD_EXCL
+
+// TRUNC truncates the dirfile contents to be empty
 const TRUNC Flags = C.GD_TRUNC
+
+// PEDANTIC makes the dirfile instist on strict adherence to standards
 const PEDANTIC Flags = C.GD_PEDANTIC
+
 const FORCEENCODING Flags = C.GD_FORCE_ENCODING
 const VERBOSE Flags = C.GD_VERBOSE
 const IGNOREDUPS Flags = C.GD_IGNORE_DUPS
