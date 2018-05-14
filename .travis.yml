@@ -6,3 +6,8 @@ go:
   - 1.10.x
 
 go_import_path: github.com/joefowler/gogetdata
+
+before_install:
+  - sudo add-apt-repository ppa:getdata/ppa
+  - sudo apt-get update -q
+  - sudo apt-get install libgetdata
