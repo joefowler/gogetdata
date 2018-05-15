@@ -135,22 +135,44 @@ func (df *Dirfile) ErrorCount() int {
 	return c
 }
 
-func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {
+// func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {
+// 	fcode := C.CString(fieldcode)
+// 	defer C.free(unsafe.Pointer(fcode))
+// 	retType := object2type(out[0])
+// 	n := C.gd_getdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
+// 		C.size_t(numFrames), C.size_t(numSamples), C.gd_type_t(retType), unsafe.Pointer(&out[0]))
+// 	return int(n)
+// }
+
+func (df Dirfile) GetConstantInt32(fieldcode string) (int32, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
-	retType := object2type(out[0])
-	n := C.gd_getdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
-		C.size_t(numFrames), C.size_t(numSamples), C.gd_type_t(retType), unsafe.Pointer(&out[0]))
-	return int(n)
+	result := C.int(32)
+	errcode := C.gd_get_constant(df.d, fcode, C.GD_INT32, unsafe.Pointer(&result))
+	if errcode != C.GD_E_OK {
+		return 0.0, df.Error()
+	}
+	return int32(result), nil
 }
 
 func (df Dirfile) GetConstantFloat32(fieldcode string) (float32, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
-	result := C.float(9.8)
+	result := C.float(3.2)
 	errcode := C.gd_get_constant(df.d, fcode, C.GD_FLOAT32, unsafe.Pointer(&result))
 	if errcode != C.GD_E_OK {
 		return 0.0, df.Error()
 	}
 	return float32(result), nil
+}
+
+func (df Dirfile) GetConstantFloat64(fieldcode string) (float64, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.double(6.4)
+	errcode := C.gd_get_constant(df.d, fcode, C.GD_FLOAT64, unsafe.Pointer(&result))
+	if errcode != C.GD_E_OK {
+		return 0.0, df.Error()
+	}
+	return float64(result), nil
 }

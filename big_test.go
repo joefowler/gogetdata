@@ -104,16 +104,36 @@ func TestRead(t *testing.T) {
 	// var n int
 	// out = d.GetData("data", 5, 0, 1, 0, out)
 
-	// #16: constant (float) check
-	f, err := d.GetConstantFloat32("const")
+	// #12: constant (int) check
+	i32, err := d.GetConstantInt32("const")
+	if err != nil {
+		t.Errorf("Could not GetConstantInt32")
+	}
+	if i32 != 5 {
+		t.Errorf("GetConstantInt32 returns %d, want 5", i32)
+	}
+	i32, err = d.GetConstantInt32("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantInt32 returned %d on non-existent field, want error", i32)
+	}
+
+	// #17: constant (float) check
+	f32, err := d.GetConstantFloat32("const")
 	if err != nil {
 		t.Errorf("Could not GetConstantFloat32")
 	}
-	if f != 5.5 {
-		t.Errorf("GetConstantFloat32 returns %f, want 5.5", f)
+	if f32 != 5.5 {
+		t.Errorf("GetConstantFloat32 returns %f, want 5.5", f32)
 	}
-	f, err = d.GetConstantFloat32("doesnt exist")
+	f32, err = d.GetConstantFloat32("doesnt exist")
 	if err == nil {
-		t.Errorf("GetConstantFloat32 returned %f on non-existent field, want error", f)
+		t.Errorf("GetConstantFloat32 returned %f on non-existent field, want error", f32)
+	}
+	f64, err := d.GetConstantFloat64("const")
+	if err != nil {
+		t.Errorf("Could not GetConstantFloat64")
+	}
+	if f64 != 5.5 {
+		t.Errorf("GetConstantFloat64 returns %f, want 5.5", f64)
 	}
 }
