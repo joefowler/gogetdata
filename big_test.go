@@ -80,12 +80,16 @@ func TestRead(t *testing.T) {
 	// #1b: read-only open check on non-existing file
 	_, err = OpenDirfile("randomfile", RDONLY)
 	if err == nil {
-		t.Errorf("Could open a non-existent dirfile")
+		t.Errorf("Could open a non-existent dirfile, want error")
 	}
 	// #2: read-write open check
-	d, err := OpenDirfile(dir, RDWR)
+	// d, err := OpenDirfile(dir, RDWR)
+	_, err = OpenDirfile(dir, RDWR)
 	if err != nil {
 		t.Errorf("Could not open dirfile read-write")
 	}
-	fmt.Printf("dirfile: %v\n", d)
+
+	// #3-5: getdata (int) check
+	// var n int
+	// out = d.GetData("data", 5, 0, 1, 0, out)
 }
