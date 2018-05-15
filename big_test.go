@@ -169,6 +169,48 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
 	}
 
+	// #208 sync check
+	err = d.Sync("data")
+	if err != nil {
+		t.Errorf("Could not call Sync on a field")
+	}
+	err = d.Sync("")
+	if err != nil {
+		t.Errorf("Could not call Sync on all fields")
+	}
+	err = d.SyncAll()
+	if err != nil {
+		t.Errorf("Could not call SyncAll")
+	}
+
+	// #209 flush check
+	err = d.Flush("data")
+	if err != nil {
+		t.Errorf("Could not call Flush on a field")
+	}
+	err = d.Flush("")
+	if err != nil {
+		t.Errorf("Could not call Flush on all fields")
+	}
+	err = d.FlushAll()
+	if err != nil {
+		t.Errorf("Could not call FlushAll")
+	}
+
+	// #233: raw_close check
+	err = d.RawClose("data")
+	if err != nil {
+		t.Errorf("Could not call RawClose on a field")
+	}
+	err = d.RawClose("")
+	if err != nil {
+		t.Errorf("Could not call RawClose on all fields")
+	}
+	err = d.RawCloseAll()
+	if err != nil {
+		t.Errorf("Could not call RawCloseAll")
+	}
+
 	err = d.Discard()
 	if err != nil {
 		t.Errorf("Could not discard dirfile read-only")

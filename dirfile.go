@@ -158,6 +158,80 @@ func (df *Dirfile) Discard() error {
 	return nil
 }
 
+// Flush will flush and close file descriptors associated with a field.
+// Use Dirfile.Flush("") or (eqivalently) Dirfile.FlushAll() to cover all
+// fields.
+func (df *Dirfile) Flush(fieldcode string) error {
+	if len(fieldcode) == 0 {
+		return df.FlushAll()
+	}
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	errcode := C.gd_flush(df.d, fcode)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// FlushAll will flush and close file descriptors associated with all fields.
+// Use Dirfile.Flush("fieldname") to flush and close only one field.
+func (df *Dirfile) FlushAll() error {
+	errcode := C.gd_flush(df.d, (*C.char)(C.NULL))
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// Sync flushes file descriptors associated with a field without closing them
+func (df *Dirfile) Sync(fieldcode string) error {
+	if len(fieldcode) == 0 {
+		return df.SyncAll()
+	}
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	errcode := C.gd_sync(df.d, fcode)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// SyncAll will flush file descriptors associated with all fields without closing them.
+// Use Dirfile.Sync("fieldname") to flush only one field.
+func (df *Dirfile) SyncAll() error {
+	errcode := C.gd_sync(df.d, (*C.char)(C.NULL))
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// RawClose closes file descriptors associated with a field without flushing them
+func (df *Dirfile) RawClose(fieldcode string) error {
+	if len(fieldcode) == 0 {
+		return df.RawCloseAll()
+	}
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	errcode := C.gd_raw_close(df.d, fcode)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// RawCloseAll will close file descriptors associated with all fields without flushing them.
+// Use Dirfile.RawClose("fieldname") to close only one field.
+func (df *Dirfile) RawCloseAll() error {
+	errcode := C.gd_raw_close(df.d, (*C.char)(C.NULL))
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
 // func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {
 // 	fcode := C.CString(fieldcode)
 // 	defer C.free(unsafe.Pointer(fcode))
