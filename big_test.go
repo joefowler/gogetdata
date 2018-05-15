@@ -197,6 +197,12 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not call FlushAll")
 	}
 
+	// #201 metaflush check
+	err = d.MetaFlush()
+	if err != nil {
+		t.Errorf("Could not call MetaFlush")
+	}
+
 	// #233: raw_close check
 	err = d.RawClose("data")
 	if err != nil {
@@ -211,6 +217,24 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not call RawCloseAll")
 	}
 
+	// #235: flags check
+	d.Flags(VERBOSE, 0)
+	flags := d.Flags(PRETTYPRINT, 0)
+	if flags&PRETTYPRINT == 0 {
+		t.Errorf("Flags(0x%x, 0x0) returned 0x%x, want that flag set", PRETTYPRINT, flags)
+	}
+	flags = d.Flags(0, PRETTYPRINT)
+	if flags&PRETTYPRINT != 0 {
+		t.Errorf("Flags(0x0, 0x%x) returned 0x%x, want that flag clear", PRETTYPRINT, flags)
+	}
+
+	// #236: verbose_prefix check
+	err = d.VerbosePrefix("big_test: ")
+	if err != nil {
+		t.Errorf("Could not set VerbosePrefix()")
+	}
+
+	// No #: test discard
 	err = d.Discard()
 	if err != nil {
 		t.Errorf("Could not discard dirfile read-only")

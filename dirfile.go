@@ -20,7 +20,7 @@ type Dirfile struct {
 }
 
 // Flags are dirfile opening flags, including encoding methods
-type Flags uint
+type Flags uint64
 
 // RDONLY open read-only
 const RDONLY Flags = C.GD_RDONLY
@@ -49,8 +49,12 @@ const TRUNC Flags = C.GD_TRUNC
 // PEDANTIC makes the dirfile instist on strict adherence to standards
 const PEDANTIC Flags = C.GD_PEDANTIC
 
+// FORCEECODING makes dirfile ignore any encoding specified in the dirfile itself: just use the encoding specified by these flags.
 const FORCEENCODING Flags = C.GD_FORCE_ENCODING
+
+// VERBOSE writes error messages to standard error automatically when errors are triggered
 const VERBOSE Flags = C.GD_VERBOSE
+
 const IGNOREDUPS Flags = C.GD_IGNORE_DUPS
 const IGNOREREFS Flags = C.GD_IGNORE_REFS
 const PRETTYPRINT Flags = C.GD_PRETTY_PRINT
@@ -135,6 +139,13 @@ func (df *Dirfile) ErrorCount() int {
 	c := df.nerr
 	df.nerr = 0
 	return c
+}
+
+// Flags lets you modify flags which affect long-term operation only.
+// These are VERBOSE and PRETTYPRINT.
+func (df *Dirfile) Flags(set Flags, reset Flags) Flags {
+	retval := C.gd_flags(df.d, C.ulong(set), C.ulong(reset))
+	return Flags(retval)
 }
 
 // Close closes all open file handles and flushes all metadata.
@@ -226,6 +237,26 @@ func (df *Dirfile) RawClose(fieldcode string) error {
 // Use Dirfile.RawClose("fieldname") to close only one field.
 func (df *Dirfile) RawCloseAll() error {
 	errcode := C.gd_raw_close(df.d, (*C.char)(C.NULL))
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// MetaFlush flushes the dirfile metadata to disk, without flushing the field data.
+func (df *Dirfile) MetaFlush() error {
+	errcode := C.gd_metaflush(df.d)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// VerbosePrefix sets the prefix used when dirfile is in VERBOSE mode.
+func (df *Dirfile) VerbosePrefix(prefix string) error {
+	vpre := C.CString(prefix)
+	defer C.free(unsafe.Pointer(vpre))
+	errcode := C.gd_verbose_prefix(df.d, vpre)
 	if errcode != C.GD_E_OK {
 		return df.Error()
 	}
