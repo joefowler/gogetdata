@@ -73,20 +73,31 @@ func TestRead(t *testing.T) {
 	defer removeTestDirfile(dir)
 
 	// #1: read-only open check
-	_, err := OpenDirfile(dir, RDONLY)
+	d, err := OpenDirfile(dir, RDONLY)
 	if err != nil {
 		t.Errorf("Could not open dirfile read-only")
 	}
+	if c := d.ErrorCount(); c > 0 {
+		t.Errorf("Error count %d when open dirfile read-only, want 0", c)
+	}
+
 	// #1b: read-only open check on non-existing file
-	_, err = OpenDirfile("randomfile", RDONLY)
+	d, err = OpenDirfile("randomfile", RDONLY)
 	if err == nil {
 		t.Errorf("Could open a non-existent dirfile, want error")
 	}
+	if c := d.ErrorCount(); c != 1 {
+		t.Errorf("Error count %d when open dirfile read-only, want 1", c)
+	}
+
 	// #2: read-write open check
 	// d, err := OpenDirfile(dir, RDWR)
-	_, err = OpenDirfile(dir, RDWR)
+	d, err = OpenDirfile(dir, RDWR)
 	if err != nil {
 		t.Errorf("Could not open dirfile read-write")
+	}
+	if c := d.ErrorCount(); c > 0 {
+		t.Errorf("Error count %d when open dirfile read-write, want 0", c)
 	}
 
 	// #3-5: getdata (int) check

@@ -15,6 +15,7 @@ import (
 // Dirfile wraps the GetData.DIRFILE opaque object.
 type Dirfile struct {
 	name string
+	nerr int
 	d    *C.DIRFILE
 }
 
@@ -121,10 +122,17 @@ func object2type(object interface{}) RetType {
 
 // Error returns the latest error as a golang error type.
 // It uses C API gd_error_string to generate the underlying string.
-func (df Dirfile) Error() error {
+func (df *Dirfile) Error() error {
+	df.nerr += int(C.gd_error_count(df.d))
 	cmsg := C.gd_error_string(df.d, (*C.char)(C.NULL), 0)
 	defer C.free(unsafe.Pointer(cmsg))
 	return errors.New(C.GoString(cmsg))
+}
+
+func (df *Dirfile) ErrorCount() int {
+	c := df.nerr
+	df.nerr = 0
+	return c
 }
 
 func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {
