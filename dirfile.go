@@ -73,52 +73,52 @@ func OpenDirfile(name string, flags Flags) (Dirfile, error) {
 	return dirfile, nil
 }
 
-type RetType uint
-
-const UNKNOWN RetType = C.GD_UNKNOWN
-const UINT8 RetType = C.GD_UINT8
-const INT8 RetType = C.GD_INT8
-const UINT16 RetType = C.GD_UINT16
-const INT16 RetType = C.GD_INT16
-const UINT32 RetType = C.GD_UINT32
-const INT32 RetType = C.GD_INT32
-const UINT64 RetType = C.GD_UINT64
-const INT64 RetType = C.GD_INT64
-const FLOAT32 RetType = C.GD_FLOAT32
-const FLOAT64 RetType = C.GD_FLOAT64
-const COMPLEX64 RetType = C.GD_COMPLEX64
-const COMPLEX128 RetType = C.GD_COMPLEX128
-const STRING RetType = C.GD_STRING
-
-func object2type(object interface{}) RetType {
-	switch object.(type) {
-	case uint8:
-		return UINT8
-	case int8:
-		return INT8
-	case uint16:
-		return UINT16
-	case int16:
-		return INT16
-	case uint32:
-		return UINT32
-	case int32:
-		return INT32
-	case uint64:
-		return UINT64
-	case int64:
-		return INT64
-	case float32:
-		return FLOAT32
-	case float64:
-		return FLOAT64
-	case complex64:
-		return COMPLEX64
-	case complex128:
-		return COMPLEX128
-	}
-	return UNKNOWN
-}
+// type RetType uint
+//
+// const UNKNOWN RetType = C.GD_UNKNOWN
+// const UINT8 RetType = C.GD_UINT8
+// const INT8 RetType = C.GD_INT8
+// const UINT16 RetType = C.GD_UINT16
+// const INT16 RetType = C.GD_INT16
+// const UINT32 RetType = C.GD_UINT32
+// const INT32 RetType = C.GD_INT32
+// const UINT64 RetType = C.GD_UINT64
+// const INT64 RetType = C.GD_INT64
+// const FLOAT32 RetType = C.GD_FLOAT32
+// const FLOAT64 RetType = C.GD_FLOAT64
+// const COMPLEX64 RetType = C.GD_COMPLEX64
+// const COMPLEX128 RetType = C.GD_COMPLEX128
+// const STRING RetType = C.GD_STRING
+//
+// func object2type(object interface{}) RetType {
+// 	switch object.(type) {
+// 	case uint8:
+// 		return UINT8
+// 	case int8:
+// 		return INT8
+// 	case uint16:
+// 		return UINT16
+// 	case int16:
+// 		return INT16
+// 	case uint32:
+// 		return UINT32
+// 	case int32:
+// 		return INT32
+// 	case uint64:
+// 		return UINT64
+// 	case int64:
+// 		return INT64
+// 	case float32:
+// 		return FLOAT32
+// 	case float64:
+// 		return FLOAT64
+// 	case complex64:
+// 		return COMPLEX64
+// 	case complex128:
+// 		return COMPLEX128
+// 	}
+// 	return UNKNOWN
+// }
 
 // Error returns the latest error as a golang error type.
 // It uses C API gd_error_string to generate the underlying string.
@@ -155,6 +155,7 @@ func (df Dirfile) GetConstantInt32(fieldcode string) (int32, error) {
 	return int32(result), nil
 }
 
+// GetConstantFloat32 returns a float32 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantFloat32(fieldcode string) (float32, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -166,6 +167,7 @@ func (df Dirfile) GetConstantFloat32(fieldcode string) (float32, error) {
 	return float32(result), nil
 }
 
+// GetConstantFloat64 returns a float64 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantFloat64(fieldcode string) (float64, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -175,4 +177,28 @@ func (df Dirfile) GetConstantFloat64(fieldcode string) (float64, error) {
 		return 0.0, df.Error()
 	}
 	return float64(result), nil
+}
+
+// GetConstantComplex64 returns a complex64 for the constant or metadata field named fieldcode
+func (df Dirfile) GetConstantComplex64(fieldcode string) (complex64, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.complexfloat(6.4 + 1i)
+	errcode := C.gd_get_constant(df.d, fcode, C.GD_COMPLEX64, unsafe.Pointer(&result))
+	if errcode != C.GD_E_OK {
+		return 0.0, df.Error()
+	}
+	return complex64(result), nil
+}
+
+// GetConstantComplex128 returns a complex128 for the constant or metadata field named fieldcode
+func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.complexdouble(12.8 + 1i)
+	errcode := C.gd_get_constant(df.d, fcode, C.GD_COMPLEX128, unsafe.Pointer(&result))
+	if errcode != C.GD_E_OK {
+		return 0.0, df.Error()
+	}
+	return complex128(result), nil
 }

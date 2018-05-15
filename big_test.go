@@ -136,4 +136,32 @@ func TestRead(t *testing.T) {
 	if f64 != 5.5 {
 		t.Errorf("GetConstantFloat64 returns %f, want 5.5", f64)
 	}
+	f64, err = d.GetConstantFloat64("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantFloat64 returned %f on non-existent field, want error", f64)
+	}
+
+	// #19: constant (complex) check
+	c64, err := d.GetConstantComplex64("const")
+	if err != nil {
+		t.Errorf("Could not GetConstantComplex64")
+	}
+	if c64 != 5.5 {
+		t.Errorf("GetConstantComplex64 returns %f, want 5.5", c64)
+	}
+	c64, err = d.GetConstantComplex64("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantComplex64 returned %f on non-existent field, want error", c64)
+	}
+	c128, err := d.GetConstantComplex128("const")
+	if err != nil {
+		t.Errorf("Could not GetConstantComplex128")
+	}
+	if c128 != 5.5 {
+		t.Errorf("GetConstantComplex128 returns %f, want 5.5", c128)
+	}
+	c128, err = d.GetConstantComplex128("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
+	}
 }
