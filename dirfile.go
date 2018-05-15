@@ -129,10 +129,33 @@ func (df *Dirfile) Error() error {
 	return errors.New(C.GoString(cmsg))
 }
 
+// ErrorCount returns the number of errors raised by this Dirfile since the last
+// call (i.e., this call resets the counter to zero).
 func (df *Dirfile) ErrorCount() int {
 	c := df.nerr
 	df.nerr = 0
 	return c
+}
+
+// Close closes all open file handles and flushes all metadata.
+func (df *Dirfile) Close() error {
+	errcode := C.gd_close(df.d)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	df.d = nil
+	return nil
+}
+
+// Discard closes all open file handles but discards all metadata rather than
+// flushing it to disk.
+func (df *Dirfile) Discard() error {
+	errcode := C.gd_discard(df.d)
+	if errcode != C.GD_E_OK {
+		return df.Error()
+	}
+	df.d = nil
+	return nil
 }
 
 // func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {

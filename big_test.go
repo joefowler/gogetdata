@@ -80,6 +80,10 @@ func TestRead(t *testing.T) {
 	if c := d.ErrorCount(); c > 0 {
 		t.Errorf("Error count %d when open dirfile read-only, want 0", c)
 	}
+	err = d.Close()
+	if err != nil {
+		t.Errorf("Could not close dirfile read-only")
+	}
 
 	// #1b: read-only open check on non-existing file
 	d, err = OpenDirfile("randomfile", RDONLY)
@@ -163,5 +167,10 @@ func TestRead(t *testing.T) {
 	c128, err = d.GetConstantComplex128("doesnt exist")
 	if err == nil {
 		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
+	}
+
+	err = d.Discard()
+	if err != nil {
+		t.Errorf("Could not discard dirfile read-only")
 	}
 }
