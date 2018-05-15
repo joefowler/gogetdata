@@ -103,4 +103,17 @@ func TestRead(t *testing.T) {
 	// #3-5: getdata (int) check
 	// var n int
 	// out = d.GetData("data", 5, 0, 1, 0, out)
+
+	// #16: constant (float) check
+	f, err := d.GetConstantFloat32("const")
+	if err != nil {
+		t.Errorf("Could not GetConstantFloat32")
+	}
+	if f != 5.5 {
+		t.Errorf("GetConstantFloat32 returns %f, want 5.5", f)
+	}
+	f, err = d.GetConstantFloat32("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantFloat32 returned %f on non-existent field, want error", f)
+	}
 }

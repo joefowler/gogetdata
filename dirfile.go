@@ -143,3 +143,14 @@ func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, 
 		C.size_t(numFrames), C.size_t(numSamples), C.gd_type_t(retType), unsafe.Pointer(&out[0]))
 	return int(n)
 }
+
+func (df Dirfile) GetConstantFloat32(fieldcode string) (float32, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.float(9.8)
+	errcode := C.gd_get_constant(df.d, fcode, C.GD_FLOAT32, unsafe.Pointer(&result))
+	if errcode != C.GD_E_OK {
+		return 0.0, df.Error()
+	}
+	return float32(result), nil
+}
