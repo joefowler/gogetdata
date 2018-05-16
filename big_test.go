@@ -9,8 +9,12 @@ import (
 )
 
 func createTestDirfile(dir string) {
-	err := os.Mkdir(dir, 0775)
-	if err != nil && !os.IsExist(err) {
+	err := os.RemoveAll(dir)
+	if err != nil {
+		log.Fatal("Could not remove dirfile: ", err)
+	}
+	err = os.Mkdir(dir, 0775)
+	if err != nil {
 		log.Fatal("Could not create dirfile: ", err)
 	}
 	data := make([]byte, 80)
@@ -351,6 +355,53 @@ func TestRead(t *testing.T) {
 	err = d.VerbosePrefix("big_test: ")
 	if err != nil {
 		t.Errorf("Could not set VerbosePrefix()")
+	}
+
+	// #302: IncludeNS
+	idxfrag2, err := d.IncludeNS("format2", 0, "ns", CREAT|EXCL)
+	if err != nil {
+		t.Errorf("Could not Dirfile.IncludeNS")
+	}
+	if idxfrag2 != 2 {
+		t.Errorf("IncludeNS returned fragment index %d, want 2", idxfrag2)
+	}
+
+	// #303: get namespace
+	frag2, err := d.Fragment(2)
+	if err != nil {
+		t.Errorf("Could not open Fragment(2)")
+	} else {
+		if frag2.namespace != "ns" {
+			t.Errorf("Fragment(2) namespace is %s, want \"ns\"", frag2.namespace)
+		}
+
+		// #304: SetNamespace
+		err = frag2.SetNamespace("ns2")
+		if err != nil {
+			t.Errorf("Could not Fragment.SetNamespace()")
+		}
+		if frag2.namespace != "ns2" {
+			t.Errorf("Fragment(2) namespace is %s, want \"ns2\"", frag2.namespace)
+		}
+	}
+
+	// No #: test Uninclude, with and without del=true
+	const DONTDELETE bool = false
+	d.Uninclude(2, DONTDELETE)
+	idxfragX, err := d.IncludeNS("formatXX", 0, "nsblah", CREAT|EXCL)
+	if err != nil {
+		t.Errorf("Problem unincluding Fragment 2")
+	}
+	fname := fmt.Sprintf("%s/formatXX", dir)
+	_, err = os.Stat(fname)
+	if err != nil {
+		t.Errorf("Problem looking for %s", fname)
+	}
+	const DELETE bool = true
+	d.Uninclude(idxfragX, DELETE)
+	_, err = os.Stat(fname)
+	if err == nil || !os.IsNotExist(err) {
+		t.Errorf("Problem with %s, should not exist", fname)
 	}
 
 	// No #: test discard

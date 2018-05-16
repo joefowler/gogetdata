@@ -393,7 +393,7 @@ func (df *Dirfile) Include(file string, flags Flags) (int, error) {
 	return df.IncludeAtIndex(file, 0, flags)
 }
 
-// Include adds the named fragment to the dirfile at the given index.
+// IncludeAtIndex adds the named fragment to the dirfile at the given index.
 func (df *Dirfile) IncludeAtIndex(file string, index int, flags Flags) (int, error) {
 	fragmentname := C.CString(file)
 	defer C.free(unsafe.Pointer(fragmentname))
@@ -402,4 +402,30 @@ func (df *Dirfile) IncludeAtIndex(file string, index int, flags Flags) (int, err
 		return result, df.Error()
 	}
 	return result, nil
+}
+
+// IncludeNS adds the named fragment to the dirfile at the given index, adding a namespace.
+func (df *Dirfile) IncludeNS(file string, index int, namespace string, flags Flags) (int, error) {
+	fragmentname := C.CString(file)
+	defer C.free(unsafe.Pointer(fragmentname))
+	cnamespace := C.CString(namespace)
+	defer C.free(unsafe.Pointer(cnamespace))
+	result := int(C.gd_include_ns(df.d, fragmentname, C.int(index), cnamespace, C.ulong(flags)))
+	if result < 0 {
+		return result, df.Error()
+	}
+	return result, nil
+}
+
+// Uninclude removes the fragment from the dirfile at the given index.
+func (df *Dirfile) Uninclude(index int, del bool) error {
+	cdel := C.int(0)
+	if del {
+		cdel = C.int(1)
+	}
+	result := int(C.gd_uninclude(df.d, C.int(index), cdel))
+	if result != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
 }
