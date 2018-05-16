@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -167,6 +168,24 @@ func TestRead(t *testing.T) {
 	c128, err = d.GetConstantComplex128("doesnt exist")
 	if err == nil {
 		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
+	}
+
+	// #28: nframes check
+	nf := d.NFrames()
+	if nf != 10 {
+		t.Errorf("NFrames returned %d, want 10", nf)
+	}
+
+	// #65: nfragments check
+	nfrag := d.NFragments()
+	if nfrag != 1 {
+		t.Errorf("NFragments returned %d, want 1", nfrag)
+	}
+
+	// #112: dirfilename check
+	name := d.Dirfilename()
+	if !strings.HasSuffix(name, d.name) {
+		t.Errorf("d.Dirfilename() returns '%s', want suffix to be/nra '%s'", name, d.name)
 	}
 
 	// #156: invalid dirfile check

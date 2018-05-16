@@ -357,3 +357,19 @@ func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	}
 	return complex128(result), nil
 }
+
+// Dirfilename returns the full path to the dirfile
+func (df Dirfile) Dirfilename() string {
+	result := C.gd_dirfilename(df.d)
+	return C.GoString(result)
+}
+
+// NFrames returns the number of frames in the dirfile (or on error, 0)
+func (df Dirfile) NFrames() int {
+	return int(C.gd_nframes(df.d))
+}
+
+// NFragments returns the number of fragments in the dirfile (or on error, 0)
+func (df Dirfile) NFragments() int {
+	return int(C.gd_nfragments(df.d))
+}
