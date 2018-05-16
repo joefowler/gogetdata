@@ -7,6 +7,7 @@ package getdata
 #include <stdlib.h>
 */
 import "C"
+import "unsafe"
 
 // PROTECTNONE protects neither data nor format for a fragment
 const PROTECTNONE Flags = C.GD_PROTECT_NONE
@@ -30,6 +31,7 @@ type Fragment struct {
 	frameoff   uint
 	protection Flags
 	name       string
+	namespace  string
 	parent     int
 	prefix     string
 	suffix     string
@@ -44,6 +46,7 @@ func NewFragment(df *Dirfile, index int) (*Fragment, error) {
 	frag.frameoff = uint(C.gd_frameoffset(df.d, cidx))
 	frag.protection = Flags(C.gd_protection(df.d, cidx))
 	frag.name = C.GoString(C.gd_fragmentname(df.d, cidx))
+	frag.namespace = C.GoString(C.gd_fragment_namespace(df.d, cidx, (*C.char)(C.NULL)))
 	frag.parent = -1
 	if index > 0 {
 		frag.parent = int(C.gd_parent_fragment(df.d, cidx))
@@ -58,9 +61,22 @@ func NewFragment(df *Dirfile, index int) (*Fragment, error) {
 // SetProtection sets the protection level for this fragment.
 func (frag *Fragment) SetProtection(level Flags) error {
 	result := C.gd_alter_protection(frag.df.d, C.int(level), C.int(frag.index))
-	if result == C.GD_E_OK {
-		frag.protection = level
-		return nil
+	if result != C.GD_E_OK {
+		return frag.df.Error()
 	}
-	return frag.df.Error()
+	frag.protection = level
+	return nil
+}
+
+// SetNamespace sets the namespace for this fragment.
+func (frag *Fragment) SetNamespace(ns string) error {
+	namespace := C.CString(ns)
+	defer C.free(unsafe.Pointer(namespace))
+	cidx := C.int(frag.index)
+	result := C.gd_fragment_namespace(frag.df.d, cidx, namespace)
+	if result == (*C.char)(C.NULL) {
+		return frag.df.Error()
+	}
+	frag.namespace = ns
+	return nil
 }
