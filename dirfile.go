@@ -49,13 +49,16 @@ const TRUNC Flags = C.GD_TRUNC
 // PEDANTIC makes the dirfile instist on strict adherence to standards
 const PEDANTIC Flags = C.GD_PEDANTIC
 
-// FORCEECODING makes dirfile ignore any encoding specified in the dirfile itself: just use the encoding specified by these flags.
+// FORCEENCODING makes dirfile ignore any encoding specified in the dirfile itself: just use the encoding specified by these flags.
 const FORCEENCODING Flags = C.GD_FORCE_ENCODING
 
 // VERBOSE writes error messages to standard error automatically when errors are triggered
 const VERBOSE Flags = C.GD_VERBOSE
 
+// IGNOREDUPS ignore duplicate field names while parsing the dirfile metadata
 const IGNOREDUPS Flags = C.GD_IGNORE_DUPS
+
+// IGNOREREFS ignore /REFERENCE directives while parsing the dirfile metadata
 const IGNOREREFS Flags = C.GD_IGNORE_REFS
 const PRETTYPRINT Flags = C.GD_PRETTY_PRINT
 const PERMISSIVE Flags = C.GD_PERMISSIVE
@@ -261,6 +264,30 @@ func (df *Dirfile) VerbosePrefix(prefix string) error {
 		return df.Error()
 	}
 	return nil
+}
+
+// InvalidDirfile creates a Dirfile instance whose methods will always produce
+// a GD_E_BAD_DIRFILE error.
+func InvalidDirfile() Dirfile {
+	df := C.gd_invalid_dirfile()
+	return Dirfile{name: "invalid", d: df}
+}
+
+// Desync detects desynchronization of a dirfile stored on disk.
+// See C API for pathcheck and reopen meaning.
+func (df *Dirfile) Desync(pathcheck, reopen bool) (bool, error) {
+	flags := C.uint(0)
+	if pathcheck {
+		flags |= C.GD_DESYNC_PATHCHECK
+	}
+	if reopen {
+		flags |= C.GD_DESYNC_REOPEN
+	}
+	result := int(C.gd_desync(df.d, flags))
+	if result < 0 {
+		return false, df.Error()
+	}
+	return result > 0, nil
 }
 
 // func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out []interface{}) int {

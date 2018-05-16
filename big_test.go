@@ -169,6 +169,44 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
 	}
 
+	// #156: invalid dirfile check
+	invalid := InvalidDirfile()
+	if invalid.d == nil {
+		t.Errorf("InvalidDirfile returned a nil dirfile")
+	}
+	err = invalid.Flush("data")
+	if err == nil {
+		t.Errorf("InvalidDirfile().Flush() did not return error")
+	}
+	err = invalid.FlushAll()
+	if err == nil {
+		t.Errorf("InvalidDirfile().FlushAll() did not return error")
+	}
+	err = invalid.Sync("data")
+	if err == nil {
+		t.Errorf("InvalidDirfile().Sync() did not return error")
+	}
+	err = invalid.SyncAll()
+	if err == nil {
+		t.Errorf("InvalidDirfile().SyncAll() did not return error")
+	}
+	err = invalid.RawClose("data")
+	if err == nil {
+		t.Errorf("InvalidDirfile().RawClose() did not return error")
+	}
+	err = invalid.RawCloseAll()
+	if err == nil {
+		t.Errorf("InvalidDirfile().RawCloseAll() did not return error")
+	}
+	err = invalid.MetaFlush()
+	if err == nil {
+		t.Errorf("InvalidDirfile().MetaFlush() did not return error")
+	}
+	err = invalid.Close()
+	if err != nil {
+		t.Errorf("Could not Close an invalid dirfile")
+	}
+
 	// #208 sync check
 	err = d.Sync("data")
 	if err != nil {
@@ -215,6 +253,12 @@ func TestRead(t *testing.T) {
 	err = d.RawCloseAll()
 	if err != nil {
 		t.Errorf("Could not call RawCloseAll")
+	}
+
+	// #234: desync check
+	_, err = d.Desync(true, true)
+	if err != nil {
+		t.Errorf("Could not call Desync(true, true)")
 	}
 
 	// #235: flags check
