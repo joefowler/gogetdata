@@ -182,10 +182,66 @@ func TestRead(t *testing.T) {
 		t.Errorf("NFragments returned %d, want 1", nfrag)
 	}
 
+	// #66: include check
+	idx, err := d.Include("form2", 0)
+	if err != nil {
+		t.Errorf("Could not Include(\"form2\")")
+	} else if idx != 1 {
+		t.Errorf("Include(\"form2\") returned %d, want 1", idx)
+	}
+	c2, _ := d.GetConstantInt32("const2")
+	if c2 != -19 {
+		t.Errorf("Failed to read form2 fragment const2: get %d, want -19", c2)
+	}
+
+	// #110: Fragment encoding check
+	frag, err := d.Fragment(0)
+	if err != nil {
+		t.Errorf("Could not create a Dirfile.Fragment(0)")
+	}
+	if frag.encoding != UNENCODED {
+		t.Errorf("frag.encoding is %d, want %d", frag.encoding, UNENCODED)
+	}
+
+	// #111: Fragment endianness check
+	if frag.endianness != LITTLEENDIAN {
+		t.Errorf("frag.endianness is 0x%x, want 0x%x", frag.endianness, LITTLEENDIAN)
+	}
+
 	// #112: dirfilename check
 	name := d.Dirfilename()
 	if !strings.HasSuffix(name, d.name) {
-		t.Errorf("d.Dirfilename() returns '%s', want suffix to be/nra '%s'", name, d.name)
+		t.Errorf("d.Dirfilename() returns '%s', want suffix to be '%s'", name, d.name)
+	}
+
+	// #113: Fragment parent check
+	if frag.parent != -1 {
+		t.Errorf("frag.parent is %d, want -1", frag.parent)
+	}
+	frag1, err := d.Fragment(1)
+	if err != nil {
+		t.Errorf("Could not run a Dirfile.Fragment(1)")
+	} else {
+		if frag1.parent != 0 {
+			t.Errorf("frag1.parent is %d, want 0", frag1.parent)
+		}
+		if !strings.HasSuffix(frag1.name, "form2") {
+			t.Errorf("frag1.name is %s, want suffix to be \"form2\"", frag1.name)
+		}
+
+		// #114: Fragment.SetProtection check
+		err = frag1.SetProtection(PROTECTDATA)
+		if err != nil {
+			t.Errorf("Could not SetProtection(PROTECTDATA): %s", err)
+		}
+	}
+
+	// #115: Fragment.protection check
+	frag1, err = d.Fragment(1)
+	if err != nil {
+		t.Errorf("Could not run a Dirfile.Fragment(1)")
+	} else if frag1.protection != PROTECTDATA {
+		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
 
 	// #156: invalid dirfile check

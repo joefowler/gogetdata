@@ -31,11 +31,17 @@ const RDWR Flags = C.GD_RDWR
 // FORCEENDIAN override endianness
 const FORCEENDIAN Flags = C.GD_FORCE_ENDIAN
 
-// BIGENDIAN assume big-endian raw data
+// BIGENDIAN specifies big-endian raw data
 const BIGENDIAN Flags = C.GD_BIG_ENDIAN
 
-// LITTLEENDIAN assume big-endian raw data
+// LITTLEENDIAN specifies little-endian raw data
 const LITTLEENDIAN Flags = C.GD_LITTLE_ENDIAN
+
+// NATIVEENDIAN specifies native-endian raw data
+const NATIVEENDIAN Flags = 0
+
+// NONNATIVEENDIAN specifies the opposite of native-endian raw data
+const NONNATIVEENDIAN Flags = BIGENDIAN | LITTLEENDIAN
 
 // CREAT create dirfile if it doesn't exist
 const CREAT Flags = C.GD_CREAT
@@ -63,6 +69,9 @@ const IGNOREREFS Flags = C.GD_IGNORE_REFS
 const PRETTYPRINT Flags = C.GD_PRETTY_PRINT
 const PERMISSIVE Flags = C.GD_PERMISSIVE
 const TRUNCSUB Flags = C.GD_TRUNCSUB
+
+// UNENCODED means data are raw binary, not compressed
+const UNENCODED Flags = C.GD_UNENCODED
 
 // OpenDirfile returns an open Dirfile object, with read/write, encoding, and other flags
 // given by the flags argument.
@@ -372,4 +381,25 @@ func (df Dirfile) NFrames() int {
 // NFragments returns the number of fragments in the dirfile (or on error, 0)
 func (df Dirfile) NFragments() int {
 	return int(C.gd_nfragments(df.d))
+}
+
+// Fragment returns a Fragment pointer to the nth dirfile fragment
+func (df Dirfile) Fragment(n int) (*Fragment, error) {
+	return NewFragment(&df, n)
+}
+
+// Include adds the named fragment to the dirfile.
+func (df *Dirfile) Include(file string, flags Flags) (int, error) {
+	return df.IncludeAtIndex(file, 0, flags)
+}
+
+// Include adds the named fragment to the dirfile at the given index.
+func (df *Dirfile) IncludeAtIndex(file string, index int, flags Flags) (int, error) {
+	fragmentname := C.CString(file)
+	defer C.free(unsafe.Pointer(fragmentname))
+	result := int(C.gd_include(df.d, fragmentname, C.int(index), C.ulong(flags)))
+	if result < 0 {
+		return result, df.Error()
+	}
+	return result, nil
 }
