@@ -388,6 +388,17 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 	return NewFragment(&df, n)
 }
 
+// NFields returns the number of fields in the dirfile
+func (df Dirfile) NFields() uint {
+	return uint(C.gd_nfields(df.d))
+}
+
+// NVectors returns the number of vector fields (that is all field types except
+// CONST, CARRAY, and STRING) in the dirfile
+func (df Dirfile) NVectors() uint {
+	return uint(C.gd_nvectors(df.d))
+}
+
 // Include adds the named fragment to the dirfile.
 func (df *Dirfile) Include(file string, flags Flags) (int, error) {
 	return df.IncludeAtIndex(file, 0, flags)

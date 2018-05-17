@@ -174,7 +174,13 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetConstantComplex128 returned %f on non-existent field, want error", c128)
 	}
 
-	// #28: nframes check
+	// #23: NFields check
+	nfields := d.NFields()
+	if nfields != 20 {
+		t.Errorf("Nfields = %d, want 20", nfields)
+	}
+
+	// #28: NFrames check
 	nf := d.NFrames()
 	if nf != 10 {
 		t.Errorf("NFrames returned %d, want 10", nf)
@@ -196,6 +202,12 @@ func TestRead(t *testing.T) {
 	c2, _ := d.GetConstantInt32("const2")
 	if c2 != -19 {
 		t.Errorf("Failed to read form2 fragment const2: get %d, want -19", c2)
+	}
+
+	// #69: NVectors check
+	nvec := d.NVectors()
+	if nvec != 15 { // TODO: update to 25 when we've added vectors in earlier tests
+		t.Errorf("NVectors = %d, want 20", nvec)
 	}
 
 	// #110: Fragment encoding check
