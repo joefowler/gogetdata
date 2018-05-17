@@ -76,4 +76,52 @@ const UNENCODED Flags = C.GD_UNENCODED
 type EntryType uint64
 
 // NOENTRY denotes an invalid entry type
-const NOENTRY = C.GD_NO_ENTRY
+const NOENTRY EntryType = C.GD_NO_ENTRY
+
+// BITENTRY denotes one or more bits out of an input vector field, treating the result as unsigned
+const BITENTRY EntryType = C.GD_BIT_ENTRY
+
+// CARRAYENTRY denotes array of constants fully specified in the format file metadata
+const CARRAYENTRY EntryType = C.GD_CARRAY_ENTRY
+
+// CONSTENTRY denotes a scalar constant fully specified in the format file metadata
+const CONSTENTRY EntryType = C.GD_CONST_ENTRY
+
+// DIVIDEENTRY denotes the quotient of two vector fields
+const DIVIDEENTRY EntryType = C.GD_DIVIDE_ENTRY
+
+// LINCOMENTRY denotes a linear combination of 1, 2, or 3 vector fields
+const LINCOMENTRY EntryType = C.GD_LINCOM_ENTRY
+
+// LINTERPENTRY denotes a linearly interpolated table lookup
+const LINTERPENTRY EntryType = C.GD_LINTERP_ENTRY
+
+// MPLEXENTRY denotes multiplexing of several low-rate fields into a single one
+const MPLEXENTRY EntryType = C.GD_MPLEX_ENTRY
+
+// MULTIPLYENTRY denotes the product of two vector fields
+const MULTIPLYENTRY EntryType = C.GD_MULTIPLY_ENTRY
+
+// PHASEENTRY denotes a vector field shifted in time by a specified number of samples
+const PHASEENTRY EntryType = C.GD_PHASE_ENTRY
+
+// POLYNOMENTRY denotes a polynomial function of a single input field
+const POLYNOMENTRY EntryType = C.GD_POLYNOM_ENTRY
+
+// RAWENTRY denotes time streams on disk
+const RAWENTRY EntryType = C.GD_RAW_ENTRY
+
+// RECIPENTRY denotes the reciprocal of an input field
+const RECIPENTRY EntryType = C.GD_RECIP_ENTRY
+
+// SBITENTRY denotes one or more bits out of an input vector field, treating the result as signed
+const SBITENTRY EntryType = C.GD_SBIT_ENTRY
+
+// STRINGENTRY denotes a single character string fully specified in the format file metadata
+const STRINGENTRY EntryType = C.GD_STRING_ENTRY
+
+// WINDOWENTRY denotes a portion of an input vector based on a comparison
+const WINDOWENTRY EntryType = C.GD_WINDOW_ENTRY
+
+// INDEXENTRY denotes the field type of the implicit INDEX field
+const INDEXENTRY EntryType = C.GD_INDEX_ENTRY

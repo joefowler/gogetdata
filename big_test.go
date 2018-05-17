@@ -180,6 +180,12 @@ func TestRead(t *testing.T) {
 		t.Errorf("Nfields = %d, want 20", nfields)
 	}
 
+	// #26: NMFields check
+	nmfields := d.NMFields("data")
+	if nmfields != 5 {
+		t.Errorf("Nfields(\"data\") returned %d, want 5", nmfields)
+	}
+
 	// #28: NFrames check
 	nf := d.NFrames()
 	if nf != 10 {
@@ -204,10 +210,28 @@ func TestRead(t *testing.T) {
 		t.Errorf("Failed to read form2 fragment const2: get %d, want -19", c2)
 	}
 
+	// #67: NFieldsByType check
+	nlincom := d.NFieldsByType(LINCOMENTRY)
+	if nlincom != 1 { // TODO: update to 3 when we've added vectors in earlier tests
+		t.Errorf("NFieldsByType(LINCOMENTRY) returned %d, want 1", nlincom)
+	}
+
 	// #69: NVectors check
 	nvec := d.NVectors()
 	if nvec != 15 { // TODO: update to 25 when we've added vectors in earlier tests
 		t.Errorf("NVectors = %d, want 20", nvec)
+	}
+
+	// #95: NMFieldsByType check
+	nlinterp := d.NMFieldsByType("data", LINCOMENTRY)
+	if nlinterp != 0 { // TODO: update to 1 when we've added vectors in earlier tests
+		t.Errorf("NMFieldsByType(\"data\", LINCOMENTRY) returned %d, want 0", nlinterp)
+	}
+
+	// #97: NMVectors check
+	mnvec := d.NMVectors("data")
+	if mnvec != 1 {
+		t.Errorf("NMVectors(\"data\") returned %d, want 1", mnvec)
 	}
 
 	// #110: Fragment encoding check

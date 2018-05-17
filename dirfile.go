@@ -345,6 +345,34 @@ func (df Dirfile) NVectors() uint {
 	return uint(C.gd_nvectors(df.d))
 }
 
+// NFieldsByType returns the number of fields in the dirfile.
+func (df Dirfile) NFieldsByType(etype EntryType) uint {
+	return uint(C.gd_nfields_by_type(df.d, C.gd_entype_t(etype)))
+}
+
+// NMFields returns the number of metafields in the dirfile for a particular parent.
+func (df Dirfile) NMFields(parent string) uint {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return uint(C.gd_nmfields(df.d, cparent))
+}
+
+// NMVectors returns the number of vector metafields in the dirfile for a particular parent.
+// (That is, all field types except CONST, CARRAY, and STRING.)
+func (df Dirfile) NMVectors(parent string) uint {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return uint(C.gd_nmvectors(df.d, cparent))
+}
+
+// NMFieldsByType returns the number of metafields in the dirfile for a particular
+// parent and a specified field type.
+func (df Dirfile) NMFieldsByType(parent string, etype EntryType) uint {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return uint(C.gd_nmfields_by_type(df.d, cparent, C.gd_entype_t(etype)))
+}
+
 // Include adds the named fragment to the dirfile.
 func (df *Dirfile) Include(file string, flags Flags) (int, error) {
 	return df.IncludeAtIndex(file, 0, flags)
