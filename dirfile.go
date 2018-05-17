@@ -334,6 +334,14 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 	return NewFragment(&df, n)
 }
 
+// NEntries returns the number of fields in the dirfile satisfying various criteria.
+// d
+func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return uint(C.gd_nentries(df.d, cparent, C.int(etype), C.uint(flags)))
+}
+
 // NFields returns the number of fields in the dirfile
 func (df Dirfile) NFields() uint {
 	return uint(C.gd_nfields(df.d))

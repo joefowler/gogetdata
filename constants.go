@@ -73,7 +73,7 @@ const UNENCODED Flags = C.GD_UNENCODED
 // **
 
 // EntryType signifies the field type given for entries in the FORMAT files
-type EntryType uint64
+type EntryType int64
 
 // NOENTRY denotes an invalid entry type
 const NOENTRY EntryType = C.GD_NO_ENTRY
@@ -125,3 +125,22 @@ const WINDOWENTRY EntryType = C.GD_WINDOW_ENTRY
 
 // INDEXENTRY denotes the field type of the implicit INDEX field
 const INDEXENTRY EntryType = C.GD_INDEX_ENTRY
+
+// ALLENTRIES denotes that all entry types should be counted/listed
+const ALLENTRIES EntryType = 0
+
+// ALIASENTRIES denotes that only aliases should be counted/listed
+const ALIASENTRIES EntryType = C.GD_ALIAS_ENTRIES
+
+// SCALARENTRIES denotes that only scalar fields should be counted/listed
+// (That is, CONST, CARRAY, and STRING)
+const SCALARENTRIES EntryType = C.GD_SCALAR_ENTRIES
+
+// VECTORENTRIES denotes that only vector fields should be counted/listed
+const VECTORENTRIES EntryType = C.GD_VECTOR_ENTRIES
+
+// HIDDENENTRIES denotes that hidden entries should be counted/listed
+const HIDDENENTRIES EntryType = C.GD_ENTRIES_HIDDEN
+
+// NOALIASENTRIES denotes that alias fields should NOT be counted/listed
+const NOALIASENTRIES EntryType = C.GD_ENTRIES_NOALIAS

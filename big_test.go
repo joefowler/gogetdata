@@ -376,7 +376,7 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not call Desync(true, true)")
 	}
 
-	// #235: flags check
+	// #235: Flags check
 	d.Flags(VERBOSE, 0)
 	flags := d.Flags(PRETTYPRINT, 0)
 	if flags&PRETTYPRINT == 0 {
@@ -387,10 +387,20 @@ func TestRead(t *testing.T) {
 		t.Errorf("Flags(0x0, 0x%x) returned 0x%x, want that flag clear", PRETTYPRINT, flags)
 	}
 
-	// #236: verbose_prefix check
+	// #236: VerbosePrefix check
 	err = d.VerbosePrefix("big_test: ")
 	if err != nil {
 		t.Errorf("Could not set VerbosePrefix()")
+	}
+
+	// #237: NEntries check
+	ne := d.NEntries("data", SCALARENTRIES, HIDDENENTRIES|NOALIASENTRIES)
+	if ne != 4 { // TODO: eventually 5
+		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
+	}
+	ne = d.NEntries("data", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
+	if ne != 1 { // TODO: eventually 27
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 1", ne)
 	}
 
 	// #302: IncludeNS
