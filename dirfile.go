@@ -19,60 +19,6 @@ type Dirfile struct {
 	d    *C.DIRFILE
 }
 
-// Flags are dirfile opening flags, including encoding methods
-type Flags uint64
-
-// RDONLY open read-only
-const RDONLY Flags = C.GD_RDONLY
-
-// RDWR open read/write
-const RDWR Flags = C.GD_RDWR
-
-// FORCEENDIAN override endianness
-const FORCEENDIAN Flags = C.GD_FORCE_ENDIAN
-
-// BIGENDIAN specifies big-endian raw data
-const BIGENDIAN Flags = C.GD_BIG_ENDIAN
-
-// LITTLEENDIAN specifies little-endian raw data
-const LITTLEENDIAN Flags = C.GD_LITTLE_ENDIAN
-
-// NATIVEENDIAN specifies native-endian raw data
-const NATIVEENDIAN Flags = 0
-
-// NONNATIVEENDIAN specifies the opposite of native-endian raw data
-const NONNATIVEENDIAN Flags = BIGENDIAN | LITTLEENDIAN
-
-// CREAT create dirfile if it doesn't exist
-const CREAT Flags = C.GD_CREAT
-
-// EXCL forces creation of dirfile (and fail if it exists)
-const EXCL Flags = C.GD_EXCL
-
-// TRUNC truncates the dirfile contents to be empty
-const TRUNC Flags = C.GD_TRUNC
-
-// PEDANTIC makes the dirfile instist on strict adherence to standards
-const PEDANTIC Flags = C.GD_PEDANTIC
-
-// FORCEENCODING makes dirfile ignore any encoding specified in the dirfile itself: just use the encoding specified by these flags.
-const FORCEENCODING Flags = C.GD_FORCE_ENCODING
-
-// VERBOSE writes error messages to standard error automatically when errors are triggered
-const VERBOSE Flags = C.GD_VERBOSE
-
-// IGNOREDUPS ignore duplicate field names while parsing the dirfile metadata
-const IGNOREDUPS Flags = C.GD_IGNORE_DUPS
-
-// IGNOREREFS ignore /REFERENCE directives while parsing the dirfile metadata
-const IGNOREREFS Flags = C.GD_IGNORE_REFS
-const PRETTYPRINT Flags = C.GD_PRETTY_PRINT
-const PERMISSIVE Flags = C.GD_PERMISSIVE
-const TRUNCSUB Flags = C.GD_TRUNCSUB
-
-// UNENCODED means data are raw binary, not compressed
-const UNENCODED Flags = C.GD_UNENCODED
-
 // OpenDirfile returns an open Dirfile object, with read/write, encoding, and other flags
 // given by the flags argument.
 func OpenDirfile(name string, flags Flags) (Dirfile, error) {
