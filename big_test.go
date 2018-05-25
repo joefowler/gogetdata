@@ -200,6 +200,18 @@ func TestRead(t *testing.T) {
 		t.Errorf("Nfields(\"data\") returned %d, want 5", nmfields)
 	}
 
+	// #27: MFieldList check
+	mfields := d.MFieldList("data")
+	if len(mfields) != int(nmfields) {
+		t.Errorf("MFieldList length is %d, want %d", len(mfields), nmfields)
+	}
+	truemnames := []string{"mstr", "mconst", "mcarray", "mlut", "msarray"}
+	for i := 0; i < int(nmfields); i++ {
+		if mfields[i] != truemnames[i] {
+			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, mfields[i], truemnames[i])
+		}
+	}
+
 	// #28: NFrames check
 	nf := d.NFrames()
 	if nf != 10 {
@@ -230,6 +242,19 @@ func TestRead(t *testing.T) {
 		t.Errorf("NFieldsByType(LINCOMENTRY) returned %d, want 1", nlincom)
 	}
 
+	// #68: FieldListByType check
+	ftnames := d.FieldListByType(LINCOMENTRY)
+	// trueftnames := []string{"new2","new3","lincom"} TODO: use this line
+	trueftnames := []string{"lincom"}
+	if len(ftnames) != len(trueftnames) {
+		t.Errorf("FieldListByType length is %d, want %d", len(ftnames), len(trueftnames))
+	}
+	for i := 0; i < len(trueftnames); i++ {
+		if ftnames[i] != trueftnames[i] {
+			t.Errorf("FieldListByType[%d]=\"%s\", want \"%s\"", i, ftnames[i], trueftnames[i])
+		}
+	}
+
 	// #69: NVectors check
 	nvec := d.NVectors()
 	if nvec != 15 { // TODO: update to 25 when we've added vectors in earlier tests
@@ -256,15 +281,39 @@ func TestRead(t *testing.T) {
 	}
 
 	// #95: NMFieldsByType check
-	nlinterp := d.NMFieldsByType("data", LINCOMENTRY)
-	if nlinterp != 0 { // TODO: update to 1 when we've added vectors in earlier tests
-		t.Errorf("NMFieldsByType(\"data\", LINCOMENTRY) returned %d, want 0", nlinterp)
+	nlinterp := d.NMFieldsByType("data", LINTERPENTRY)
+	if nlinterp != 1 {
+		t.Errorf("NMFieldsByType(\"data\", LINTERPENTRY) returned %d, want 0", nlinterp)
+	}
+
+	// #96: MFieldListByType check
+	mtfields := d.MFieldListByType("data", LINTERPENTRY)
+	if len(mtfields) != int(nlinterp) {
+		t.Errorf("MVectorList(\"data\", LINTERPENTRY) length is %d, want %d", len(mtfields), nlinterp)
+	}
+	truemtnames := []string{"mlut"}
+	for i := 0; i < int(nlinterp); i++ {
+		if mtfields[i] != truemtnames[i] {
+			t.Errorf("MFieldListByType[%d]=\"%s\", want \"%s\"", i, mtfields[i], truemtnames[i])
+		}
 	}
 
 	// #97: NMVectors check
 	mnvec := d.NMVectors("data")
 	if mnvec != 1 {
 		t.Errorf("NMVectors(\"data\") returned %d, want 1", mnvec)
+	}
+
+	// #98: MVectorList check
+	mvectors := d.MVectorList("data")
+	if len(mvectors) != int(mnvec) {
+		t.Errorf("MVectorList length is %d, want %d", len(mvectors), mnvec)
+	}
+	truemvnames := []string{"mlut"}
+	for i := 0; i < int(mnvec); i++ {
+		if mvectors[i] != truemvnames[i] {
+			t.Errorf("MVectorList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
+		}
 	}
 
 	// #110: Fragment encoding check

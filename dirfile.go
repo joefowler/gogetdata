@@ -403,6 +403,33 @@ func (df Dirfile) VectorList() []string {
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_vector_list(df.d)))
 }
 
+// FieldListByType returns a slice of strings listing all fields (no metafields).
+func (df Dirfile) FieldListByType(et EntryType) []string {
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_field_list_by_type(df.d, C.gd_entype_t(et))))
+}
+
+// MFieldList returns a slice of strings listing all metafields in the dirfile for a particular parent.
+func (df Dirfile) MFieldList(parent string) []string {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_mfield_list(df.d, cparent)))
+}
+
+// MVectorList returns a slice of strings listing all vector metafields in the dirfile for a particular parent.
+func (df Dirfile) MVectorList(parent string) []string {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_mvector_list(df.d, cparent)))
+}
+
+// MFieldListByType returns a slice of strings listing all metafields of a specified type for a particular parent.
+func (df Dirfile) MFieldListByType(parent string, et EntryType) []string {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	return ppchar2stringSlice(unsafe.Pointer(
+		C.gd_mfield_list_by_type(df.d, cparent, C.gd_entype_t(et))))
+}
+
 // Include adds the named fragment to the dirfile.
 func (df *Dirfile) Include(file string, flags Flags) (int, error) {
 	return df.IncludeAtIndex(file, 0, flags)
