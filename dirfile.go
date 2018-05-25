@@ -381,6 +381,28 @@ func (df Dirfile) NMFieldsByType(parent string, etype EntryType) uint {
 	return uint(C.gd_nmfields_by_type(df.d, cparent, C.gd_entype_t(etype)))
 }
 
+func ppchar2stringSlice(listptr unsafe.Pointer) []string {
+	var fields []string
+	for i := 0; ; i++ {
+		fields = append(fields, C.GoString(*(**C.char)(listptr)))
+		listptr = unsafe.Pointer(uintptr(listptr) + unsafe.Sizeof(uintptr(0)))
+		if unsafe.Pointer(*(**C.char)(listptr)) == (C.NULL) {
+			break
+		}
+	}
+	return fields
+}
+
+// FieldList returns a slice of strings listing all fields (no metafields).
+func (df Dirfile) FieldList() []string {
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_field_list(df.d)))
+}
+
+// VectorList returns a slice of strings listing all vector fields (no metafields).
+func (df Dirfile) VectorList() []string {
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_vector_list(df.d)))
+}
+
 // Include adds the named fragment to the dirfile.
 func (df *Dirfile) Include(file string, flags Flags) (int, error) {
 	return df.IncludeAtIndex(file, 0, flags)

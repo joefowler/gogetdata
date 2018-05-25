@@ -180,6 +180,20 @@ func TestRead(t *testing.T) {
 		t.Errorf("Nfields = %d, want 20", nfields)
 	}
 
+	// #25: FieldList check
+	fields := d.FieldList()
+	if len(fields) != int(nfields) {
+		t.Errorf("FieldList length is %d, want %d", len(fields), nfields)
+	}
+	truenames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
+		"alias", "const", "indir", "mplex", "phase", "recip", "carray", "lincom",
+		"sarray", "sindir", "string", "window", "linterp", "polynom"}
+	for i := 0; i < int(nfields); i++ {
+		if fields[i] != truenames[i] {
+			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, fields[i], truenames[i])
+		}
+	}
+
 	// #26: NMFields check
 	nmfields := d.NMFields("data")
 	if nmfields != 5 {
@@ -220,6 +234,25 @@ func TestRead(t *testing.T) {
 	nvec := d.NVectors()
 	if nvec != 15 { // TODO: update to 25 when we've added vectors in earlier tests
 		t.Errorf("NVectors = %d, want 20", nvec)
+	}
+
+	// #70: VectorList check
+	vectors := d.VectorList()
+	if len(vectors) != int(nvec) {
+		t.Errorf("VectorList length is %d, want %d", len(vectors), nvec)
+	}
+	// truevnames := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
+	// 	"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
+	// 	"alias", "indir", "mplex", "new10", "phase", "recip", "lincom",
+	// 	"window", "linterp", "polynom"}
+	// TODO: fix when all tests are in place. Above is the true answer.
+	truevnames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
+		"alias", "indir", "mplex", "phase", "recip", "lincom",
+		"window", "linterp", "polynom"}
+	for i := 0; i < int(nvec); i++ {
+		if vectors[i] != truevnames[i] {
+			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
+		}
 	}
 
 	// #95: NMFieldsByType check
