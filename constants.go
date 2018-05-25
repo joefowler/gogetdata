@@ -144,3 +144,18 @@ const HIDDENENTRIES EntryType = C.GD_ENTRIES_HIDDEN
 
 // NOALIASENTRIES denotes that alias fields should NOT be counted/listed
 const NOALIASENTRIES EntryType = C.GD_ENTRIES_NOALIAS
+
+// REGEXPCRE use the Perl-Compatible Regular Expression library instead of the POSIX
+const REGEXPCRE EntryType = C.GD_REGEX_PCRE
+
+// REGEXCASELESS do case-insensitive matching
+const REGEXCASELESS EntryType = C.GD_REGEX_CASELESS
+
+// REGEXICASE do case-insensitive matching (synonym of above)
+const REGEXICASE EntryType = C.GD_REGEX_ICASE
+
+// REGEXJAVASCRIPT (PCRE only): use Javascript-compatible reg exp grammar
+const REGEXJAVASCRIPT EntryType = C.GD_REGEX_JAVASCRIPT
+
+// REGEXUNICODE (PCRE only): use UTF-8
+const REGEXUNICODE EntryType = C.GD_REGEX_UNICODE

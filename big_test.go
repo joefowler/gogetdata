@@ -558,6 +558,22 @@ func TestRead(t *testing.T) {
 		t.Errorf("Problem with %s, should not exist", fname)
 	}
 
+	// #305: MatchEntries
+	matchedList, err := d.MatchEntries("^lin", 0, 0, 0)
+	if err != nil {
+		t.Errorf("Could not d.MatchEntries")
+	} else if len(matchedList) != 2 {
+		t.Errorf("d.MatchEntries returns list of length %d, want 2", len(matchedList))
+	} else {
+		trueList := []string{"lincom", "linterp"}
+		for i := 0; i < len(trueList); i++ {
+			if matchedList[i] != trueList[i] {
+				t.Errorf("d.MatchEntries()[%d] = \"%s\", want \"%s\"",
+					i, matchedList[i], trueList[i])
+			}
+		}
+	}
+
 	// No #: test discard
 	err = d.Discard()
 	if err != nil {

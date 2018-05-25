@@ -405,6 +405,18 @@ func ppchar2stringSlice(listptr unsafe.Pointer) []string {
 	return fields
 }
 
+// MatchEntries returns a list of entries in the dirfile satisfying various criteria
+func (df Dirfile) MatchEntries(regex string, fragment int, et EntryType, flags Flags) ([]string, error) {
+	cregex := C.CString(regex)
+	defer C.free(unsafe.Pointer(cregex))
+	var ptr (**C.char)
+	n := C.gd_match_entries(df.d, cregex, C.int(fragment), C.int(et), C.uint(flags), &ptr)
+	if n < 0 {
+		return nil, df.Error()
+	}
+	return ppchar2stringSlice(unsafe.Pointer(ptr)), nil
+}
+
 // EntryList returns a slice of strings listing all fields meeting various criteria.
 func (df Dirfile) EntryList(parent string, et EntryType, flags EntryType) []string {
 	cparent := C.CString(parent)
