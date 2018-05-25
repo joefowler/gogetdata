@@ -184,13 +184,14 @@ func TestRead(t *testing.T) {
 	fields := d.FieldList()
 	if len(fields) != int(nfields) {
 		t.Errorf("FieldList length is %d, want %d", len(fields), nfields)
-	}
-	truenames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
-		"alias", "const", "indir", "mplex", "phase", "recip", "carray", "lincom",
-		"sarray", "sindir", "string", "window", "linterp", "polynom"}
-	for i := 0; i < int(nfields); i++ {
-		if fields[i] != truenames[i] {
-			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, fields[i], truenames[i])
+	} else {
+		truenames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
+			"alias", "const", "indir", "mplex", "phase", "recip", "carray", "lincom",
+			"sarray", "sindir", "string", "window", "linterp", "polynom"}
+		for i := 0; i < int(nfields); i++ {
+			if fields[i] != truenames[i] {
+				t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, fields[i], truenames[i])
+			}
 		}
 	}
 
@@ -204,11 +205,12 @@ func TestRead(t *testing.T) {
 	mfields := d.MFieldList("data")
 	if len(mfields) != int(nmfields) {
 		t.Errorf("MFieldList length is %d, want %d", len(mfields), nmfields)
-	}
-	truemnames := []string{"mstr", "mconst", "mcarray", "mlut", "msarray"}
-	for i := 0; i < int(nmfields); i++ {
-		if mfields[i] != truemnames[i] {
-			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, mfields[i], truemnames[i])
+	} else {
+		truemnames := []string{"mstr", "mconst", "mcarray", "mlut", "msarray"}
+		for i := 0; i < int(nmfields); i++ {
+			if mfields[i] != truemnames[i] {
+				t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, mfields[i], truemnames[i])
+			}
 		}
 	}
 
@@ -248,10 +250,11 @@ func TestRead(t *testing.T) {
 	trueftnames := []string{"lincom"}
 	if len(ftnames) != len(trueftnames) {
 		t.Errorf("FieldListByType length is %d, want %d", len(ftnames), len(trueftnames))
-	}
-	for i := 0; i < len(trueftnames); i++ {
-		if ftnames[i] != trueftnames[i] {
-			t.Errorf("FieldListByType[%d]=\"%s\", want \"%s\"", i, ftnames[i], trueftnames[i])
+	} else {
+		for i := 0; i < len(trueftnames); i++ {
+			if ftnames[i] != trueftnames[i] {
+				t.Errorf("FieldListByType[%d]=\"%s\", want \"%s\"", i, ftnames[i], trueftnames[i])
+			}
 		}
 	}
 
@@ -265,18 +268,19 @@ func TestRead(t *testing.T) {
 	vectors := d.VectorList()
 	if len(vectors) != int(nvec) {
 		t.Errorf("VectorList length is %d, want %d", len(vectors), nvec)
-	}
-	// truevnames := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
-	// 	"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
-	// 	"alias", "indir", "mplex", "new10", "phase", "recip", "lincom",
-	// 	"window", "linterp", "polynom"}
-	// TODO: fix when all tests are in place. Above is the true answer.
-	truevnames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
-		"alias", "indir", "mplex", "phase", "recip", "lincom",
-		"window", "linterp", "polynom"}
-	for i := 0; i < int(nvec); i++ {
-		if vectors[i] != truevnames[i] {
-			t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
+	} else {
+		// truevnames := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
+		// 	"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
+		// 	"alias", "indir", "mplex", "new10", "phase", "recip", "lincom",
+		// 	"window", "linterp", "polynom"}
+		// TODO: fix when all tests are in place. Above is the true answer.
+		truevnames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
+			"alias", "indir", "mplex", "phase", "recip", "lincom",
+			"window", "linterp", "polynom"}
+		for i := 0; i < int(nvec); i++ {
+			if vectors[i] != truevnames[i] {
+				t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
+			}
 		}
 	}
 
@@ -290,11 +294,12 @@ func TestRead(t *testing.T) {
 	mtfields := d.MFieldListByType("data", LINTERPENTRY)
 	if len(mtfields) != int(nlinterp) {
 		t.Errorf("MVectorList(\"data\", LINTERPENTRY) length is %d, want %d", len(mtfields), nlinterp)
-	}
-	truemtnames := []string{"mlut"}
-	for i := 0; i < int(nlinterp); i++ {
-		if mtfields[i] != truemtnames[i] {
-			t.Errorf("MFieldListByType[%d]=\"%s\", want \"%s\"", i, mtfields[i], truemtnames[i])
+	} else {
+		truemtnames := []string{"mlut"}
+		for i := 0; i < int(nlinterp); i++ {
+			if mtfields[i] != truemtnames[i] {
+				t.Errorf("MFieldListByType[%d]=\"%s\", want \"%s\"", i, mtfields[i], truemtnames[i])
+			}
 		}
 	}
 
@@ -308,11 +313,12 @@ func TestRead(t *testing.T) {
 	mvectors := d.MVectorList("data")
 	if len(mvectors) != int(mnvec) {
 		t.Errorf("MVectorList length is %d, want %d", len(mvectors), mnvec)
-	}
-	truemvnames := []string{"mlut"}
-	for i := 0; i < int(mnvec); i++ {
-		if mvectors[i] != truemvnames[i] {
-			t.Errorf("MVectorList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
+	} else {
+		truemvnames := []string{"mlut"}
+		for i := 0; i < int(mnvec); i++ {
+			if mvectors[i] != truemvnames[i] {
+				t.Errorf("MVectorList[%d]=\"%s\", want \"%s\"", i, vectors[i], truemvnames[i])
+			}
 		}
 	}
 
@@ -480,9 +486,29 @@ func TestRead(t *testing.T) {
 	if ne != 4 { // TODO: eventually 5
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
-	ne = d.NEntries("data", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 1 { // TODO: eventually 27
-		t.Errorf("d.NEntries counts %d VECTOR entries, want 1", ne)
+	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
+	if ne != 14 { // TODO: eventually 27
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 14", ne)
+	}
+
+	// #239: EntryList check
+	entryList := d.EntryList("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
+	if len(entryList) != int(ne) {
+		t.Errorf("d.EntryList return %d entries, want %d", len(entryList), ne)
+	} else {
+		// trueEntries := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
+		// 	"new4", "new5", "new6", "new7", "new8", "sbit", "INDEX",
+		// 	"indir", "mplex", "new14", "new15", "new16", "new18", "new21", "phase", "recip", "lincom",
+		// 	"window", "linterp", "polynom"}
+		// TODO: use the above
+		trueEntries := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
+			"indir", "mplex", "phase", "recip", "lincom",
+			"window", "linterp", "polynom"}
+		for i := 0; i < int(ne); i++ {
+			if entryList[i] != trueEntries[i] {
+				t.Errorf("EntryList[%d]=\"%s\", want \"%s\"", i, entryList[i], trueEntries[i])
+			}
+		}
 	}
 
 	// #302: IncludeNS

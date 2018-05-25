@@ -339,6 +339,9 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return uint(C.gd_nentries(df.d, cparent, C.int(etype), C.uint(flags)))
 }
 
@@ -362,6 +365,9 @@ func (df Dirfile) NFieldsByType(etype EntryType) uint {
 func (df Dirfile) NMFields(parent string) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return uint(C.gd_nmfields(df.d, cparent))
 }
 
@@ -370,6 +376,9 @@ func (df Dirfile) NMFields(parent string) uint {
 func (df Dirfile) NMVectors(parent string) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return uint(C.gd_nmvectors(df.d, cparent))
 }
 
@@ -378,6 +387,9 @@ func (df Dirfile) NMVectors(parent string) uint {
 func (df Dirfile) NMFieldsByType(parent string, etype EntryType) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return uint(C.gd_nmfields_by_type(df.d, cparent, C.gd_entype_t(etype)))
 }
 
@@ -391,6 +403,16 @@ func ppchar2stringSlice(listptr unsafe.Pointer) []string {
 		}
 	}
 	return fields
+}
+
+// EntryList returns a slice of strings listing all fields meeting various criteria.
+func (df Dirfile) EntryList(parent string, et EntryType, flags EntryType) []string {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
+	return ppchar2stringSlice(unsafe.Pointer(C.gd_entry_list(df.d, cparent, C.int(et), C.uint(flags))))
 }
 
 // FieldList returns a slice of strings listing all fields (no metafields).
@@ -412,6 +434,9 @@ func (df Dirfile) FieldListByType(et EntryType) []string {
 func (df Dirfile) MFieldList(parent string) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_mfield_list(df.d, cparent)))
 }
 
@@ -419,6 +444,9 @@ func (df Dirfile) MFieldList(parent string) []string {
 func (df Dirfile) MVectorList(parent string) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_mvector_list(df.d, cparent)))
 }
 
@@ -426,6 +454,9 @@ func (df Dirfile) MVectorList(parent string) []string {
 func (df Dirfile) MFieldListByType(parent string, et EntryType) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
+	if len(parent) == 0 {
+		cparent = (*C.char)(C.NULL)
+	}
 	return ppchar2stringSlice(unsafe.Pointer(
 		C.gd_mfield_list_by_type(df.d, cparent, C.gd_entype_t(et))))
 }
