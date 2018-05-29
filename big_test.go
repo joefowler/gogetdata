@@ -109,8 +109,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("Error count %d when open dirfile read-write, want 0", c)
 	}
 
-	// #3-5: getdata (int) check
-	u1 := make([]uint8, 8)
+	// #3: getdata (int) check
+	u1 := make([]int8, 8)
 	n, err := d.GetData("data", 5, 0, 1, 0, &u1)
 	if err != nil {
 		t.Error("Could not GetData: ", err)
@@ -120,12 +120,13 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetData returned %d, want 8", n)
 	} else {
 		for i := 0; i < 8; i++ {
-			if u1[i] != uint8(41+i) {
+			if u1[i] != int8(41+i) {
 				t.Errorf("GetData out[%d]=%d, want %d", i, u1[i], 41+i)
 			}
 		}
 	}
 
+	// #6: getdata (int64) check
 	u2 := make([]uint64, 8)
 	n, err = d.GetData("data", 5, 0, 1, 0, &u2)
 	if err != nil {
@@ -142,7 +143,8 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	u3 := make([]int32, 8)
+	// #8: getdata (float64) check
+	u3 := make([]float64, 8)
 	n, err = d.GetData("data", 5, 0, 1, 0, &u3)
 	if err != nil {
 		t.Error("Could not GetData: ", err)
@@ -154,11 +156,32 @@ func TestRead(t *testing.T) {
 
 	} else {
 		for i := 0; i < 8; i++ {
-			if u3[i] != int32(41+i) {
-				t.Errorf("GetData out[%d]=%d, want %d", i, u3[i], 41+i)
+			if u3[i] != float64(41+i) {
+				t.Errorf("GetData out[%d]=%.5f, want %d.00000", i, u3[i], 41+i)
 			}
 		}
 	}
+
+	// #10: getdata (complex128) check
+	u4 := make([]complex128, 8)
+	n, err = d.GetData("data", 5, 0, 1, 0, &u4)
+	if err != nil {
+		t.Error("Could not GetData: ", err)
+	} else if len(u4) < 8 {
+		t.Errorf("GetData out has len=%d (cap=%d), want 8", len(u4), cap(u4))
+
+	} else if n != 8 {
+		t.Errorf("GetData returned %d, want 8", n)
+
+	} else {
+		for i := 0; i < 8; i++ {
+			if u4[i] != complex(41.0+float64(i), 0.0) {
+				t.Errorf("GetData out[%d]=%.5f+%5fi, want %d.00000", i, real(u4[i]), imag(u4[i]), 41+i)
+			}
+		}
+	}
+
+	// #11: Check for appropriate errors in GetData
 	n, err = d.GetData("data", 5, 0, 0, 0, &u3)
 	if err == nil || n > 0 {
 		t.Errorf("GetData with 0 frames/samples requested returns (%d, %s), want (0, error)", n, err)
