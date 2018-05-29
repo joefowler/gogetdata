@@ -8,7 +8,7 @@ package getdata
 */
 import "C"
 
-// Flags are dirfile opening flags, including encoding methods
+// Flags are dirfile-opening flags, including encoding methods
 type Flags uint64
 
 // RDONLY open read-only

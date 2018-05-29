@@ -110,13 +110,68 @@ func TestRead(t *testing.T) {
 	}
 
 	// #3-5: getdata (int) check
-	// var n int
-	// out = d.GetData("data", 5, 0, 1, 0, out)
+	u1 := make([]uint8, 8)
+	n, err := d.GetData("data", 5, 0, 1, 0, &u1)
+	if err != nil {
+		t.Error("Could not GetData: ", err)
+	} else if len(u1) < 8 {
+		t.Errorf("GetData out has len=%d (cap=%d), want 8", len(u1), cap(u1))
+	} else if n != 8 {
+		t.Errorf("GetData returned %d, want 8", n)
+	} else {
+		for i := 0; i < 8; i++ {
+			if u1[i] != uint8(41+i) {
+				t.Errorf("GetData out[%d]=%d, want %d", i, u1[i], 41+i)
+			}
+		}
+	}
+
+	u2 := make([]uint64, 8)
+	n, err = d.GetData("data", 5, 0, 1, 0, &u2)
+	if err != nil {
+		t.Error("Could not GetData: ", err)
+	} else if len(u2) < 8 {
+		t.Errorf("GetData out has len=%d (cap=%d), want 8", len(u2), cap(u2))
+	} else if n != 8 {
+		t.Errorf("GetData returned %d, want 8", n)
+	} else {
+		for i := 0; i < 8; i++ {
+			if u2[i] != uint64(41+i) {
+				t.Errorf("GetData out[%d]=%d, want %d", i, u2[i], 41+i)
+			}
+		}
+	}
+
+	u3 := make([]int32, 8)
+	n, err = d.GetData("data", 5, 0, 1, 0, &u3)
+	if err != nil {
+		t.Error("Could not GetData: ", err)
+	} else if len(u3) < 8 {
+		t.Errorf("GetData out has len=%d (cap=%d), want 8", len(u3), cap(u3))
+
+	} else if n != 8 {
+		t.Errorf("GetData returned %d, want 8", n)
+
+	} else {
+		for i := 0; i < 8; i++ {
+			if u3[i] != int32(41+i) {
+				t.Errorf("GetData out[%d]=%d, want %d", i, u3[i], 41+i)
+			}
+		}
+	}
+	n, err = d.GetData("data", 5, 0, 0, 0, &u3)
+	if err == nil || n > 0 {
+		t.Errorf("GetData with 0 frames/samples requested returns (%d, %s), want (0, error)", n, err)
+	}
+	n, err = d.GetData("data", 5, 0, 1, 0, u3)
+	if err == nil || n > 0 {
+		t.Errorf("GetData with out argument not a slice pointer returns (%d, %s), want (0, error)", n, err)
+	}
 
 	// #12: constant (int) check
 	i32, err := d.GetConstantInt32("const")
 	if err != nil {
-		t.Errorf("Could not GetConstantInt32")
+		t.Error("Could not GetConstantInt32: ", err)
 	}
 	if i32 != 5 {
 		t.Errorf("GetConstantInt32 returns %d, want 5", i32)
@@ -129,7 +184,7 @@ func TestRead(t *testing.T) {
 	// #17: constant (float) check
 	f32, err := d.GetConstantFloat32("const")
 	if err != nil {
-		t.Errorf("Could not GetConstantFloat32")
+		t.Error("Could not GetConstantFloat32: ", err)
 	}
 	if f32 != 5.5 {
 		t.Errorf("GetConstantFloat32 returns %f, want 5.5", f32)
