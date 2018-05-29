@@ -58,6 +58,15 @@ func NewFragment(df *Dirfile, index int) (*Fragment, error) {
 	return frag, nil
 }
 
+// Rewrite forces GetData to rewrite a format specification fragment, even if unchanged.
+func (frag *Fragment) Rewrite() error {
+	result := C.gd_rewrite_fragment(frag.df.d, C.int(frag.index))
+	if result != C.GD_E_OK {
+		return frag.df.Error()
+	}
+	return nil
+}
+
 // SetProtection sets the protection level for this fragment.
 func (frag *Fragment) SetProtection(level Flags) error {
 	result := C.gd_alter_protection(frag.df.d, C.int(level), C.int(frag.index))

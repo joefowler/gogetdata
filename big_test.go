@@ -427,6 +427,12 @@ func TestRead(t *testing.T) {
 		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
 
+	// #155: Fragment.Rewrite check
+	err = frag.Rewrite()
+	if err != nil {
+		t.Errorf("Could not run Fragment.Rewrite()")
+	}
+
 	// #156: invalid dirfile check
 	invalid := InvalidDirfile()
 	if invalid.d == nil {
@@ -565,6 +571,9 @@ func TestRead(t *testing.T) {
 			}
 		}
 	}
+
+	// #240: MplexLookback test (returns nothing, so simply call it)
+	d.MplexLookback(LOOKBACKALL)
 
 	// #302: IncludeNS
 	idxfrag2, err := d.IncludeNS("format2", 0, "ns", CREAT|EXCL)

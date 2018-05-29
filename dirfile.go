@@ -219,6 +219,12 @@ func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, 
 	return int(n), nil
 }
 
+// MplexLookback changes how far GetData searches backwards for the initial
+// value of a field when reading a MPLEX field
+func (df *Dirfile) MplexLookback(lookback int) {
+	C.gd_mplex_lookback(df.d, C.int(lookback))
+}
+
 // GetConstantInt32 returns an int32 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantInt32(fieldcode string) (int32, error) {
 	fcode := C.CString(fieldcode)

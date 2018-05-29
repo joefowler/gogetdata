@@ -159,3 +159,6 @@ const REGEXJAVASCRIPT EntryType = C.GD_REGEX_JAVASCRIPT
 
 // REGEXUNICODE (PCRE only): use UTF-8
 const REGEXUNICODE EntryType = C.GD_REGEX_UNICODE
+
+// LOOKBACKALL searches backwards all the way to the start of a data source.
+const LOOKBACKALL int = -1
