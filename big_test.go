@@ -311,6 +311,95 @@ func TestRead(t *testing.T) {
 		t.Errorf("NFrames returned %d, want 10", nf)
 	}
 
+	// #30: PutData int32 check
+	dataToPut := []int32{13, 14, 15, 16}
+	n, err = d.PutData("data", 5, 1, dataToPut)
+	if err != nil {
+		t.Errorf("Could not PutData in test 30")
+	} else if n != len(dataToPut) {
+		t.Errorf("PutData returned %d in test 30, want %d", n, len(dataToPut))
+	}
+	testData := make([]int32, 8)
+	n, err = d.GetData("data", 5, 0, 1, 0, &testData)
+	if err != nil {
+		t.Errorf("Could not GetData in test 30")
+	} else if n != len(testData) {
+		t.Errorf("GetData returned %d in test 30, want %d", n, len(testData))
+	} else {
+		expectedData := []int32{41, 13, 14, 15, 16, 46, 47, 48}
+		for i := 0; i < 8; i++ {
+			if testData[i] != expectedData[i] {
+				t.Errorf("GetData returned d[%d]=%d in test 30, want %d", i, testData[i], expectedData[i])
+			}
+		}
+	}
+
+	// #33: PutData int64 check
+	dataToPut64 := []int64{13, 14, 15, 16}
+	n, err = d.PutData("data", 5, 1, dataToPut64)
+	if err != nil {
+		t.Errorf("Could not PutData in test 33")
+	} else if n != len(dataToPut64) {
+		t.Errorf("PutData returned %d in test 33, want %d", n, len(dataToPut64))
+	}
+	n, err = d.GetData("data", 5, 0, 1, 0, &testData)
+	if err != nil {
+		t.Errorf("Could not GetData in test 33")
+	} else if n != len(testData) {
+		t.Errorf("GetData returned %d in test 33, want %d", n, len(testData))
+	} else {
+		expectedData := []int32{41, 13, 14, 15, 16, 46, 47, 48}
+		for i := 0; i < 8; i++ {
+			if testData[i] != expectedData[i] {
+				t.Errorf("GetData returned d[%d]=%d in test 33, want %d", i, testData[i], expectedData[i])
+			}
+		}
+	}
+
+	// #35: PutData float64 check
+	dataToPutF := []float64{13, 14, 15, 16}
+	n, err = d.PutData("data", 5, 1, dataToPutF)
+	if err != nil {
+		t.Errorf("Could not PutData in test 35")
+	} else if n != len(dataToPutF) {
+		t.Errorf("PutData returned %d in test 35, want %d", n, len(dataToPutF))
+	}
+	n, err = d.GetData("data", 5, 0, 1, 0, &testData)
+	if err != nil {
+		t.Errorf("Could not GetData in test 35")
+	} else if n != len(testData) {
+		t.Errorf("GetData returned %d in test 35, want %d", n, len(testData))
+	} else {
+		expectedData := []int32{41, 13, 14, 15, 16, 46, 47, 48}
+		for i := 0; i < 8; i++ {
+			if testData[i] != expectedData[i] {
+				t.Errorf("GetData returned d[%d]=%d in test 35, want %d", i, testData[i], expectedData[i])
+			}
+		}
+	}
+
+	// #37: PutData complex128 check
+	dataToPutC := []complex128{13, 14, 15, 16}
+	n, err = d.PutData("data", 5, 1, dataToPutC)
+	if err != nil {
+		t.Errorf("Could not PutData in test 37")
+	} else if n != len(dataToPutC) {
+		t.Errorf("PutData returned %d in test 37, want %d", n, len(dataToPutC))
+	}
+	n, err = d.GetData("data", 5, 0, 1, 0, &testData)
+	if err != nil {
+		t.Errorf("Could not GetData in test 37")
+	} else if n != len(testData) {
+		t.Errorf("GetData returned %d in test 37, want %d", n, len(testData))
+	} else {
+		expectedData := []int32{41, 13, 14, 15, 16, 46, 47, 48}
+		for i := 0; i < 8; i++ {
+			if testData[i] != expectedData[i] {
+				t.Errorf("GetData returned d[%d]=%d in test 37, want %d", i, testData[i], expectedData[i])
+			}
+		}
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
@@ -462,6 +551,8 @@ func TestRead(t *testing.T) {
 	} else if frag1.protection != PROTECTDATA {
 		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
+
+	// #138: PutData (auto) check duplicates #37, so skip it.
 
 	// #155: Fragment.Rewrite check
 	err = frag.Rewrite()

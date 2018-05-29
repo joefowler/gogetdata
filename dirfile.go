@@ -207,7 +207,7 @@ func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, 
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
 	// expectedSamples := numSamples + numFrames*df.
-	retType, ptr := array2type(out)
+	retType, ptr := parray2type(out)
 	if retType == UNKNOWN || ptr == C.NULL {
 		return 0, fmt.Errorf("GetData out variable was not a pointer to numeric slice")
 	}
@@ -275,6 +275,26 @@ func (df Dirfile) GetConstantComplex64(fieldcode string) (complex64, error) {
 func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	var c complex128
 	return c, df.GetConstant(fieldcode, &c)
+}
+
+// PutData stores data to a vector field in the dirfile (incl. metafields)
+// data should be a slice of numeric data, e.g.
+// var d []int32{4,5,6,7,8}
+// n, err := df.PutData("field", 5, 0, d)
+// if n != len(d) || err != nil {...<problem>...}
+func (df *Dirfile) PutData(fieldcode string, firstFrame, firstSample int, data interface{}) (int, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	dType, ptr, lenData := array2type(data)
+	if dType == UNKNOWN || dType == NULLTYPE || ptr == C.NULL {
+		return 0, fmt.Errorf("PutData data variable was not a numeric slice")
+	}
+	n := C.gd_putdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
+		C.size_t(0), C.size_t(lenData), C.gd_type_t(dType), ptr)
+	if n == 0 {
+		return 0, df.Error()
+	}
+	return int(n), nil
 }
 
 // Dirfilename returns the full path to the dirfile

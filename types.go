@@ -59,10 +59,11 @@ const NULLTYPE RetType = C.GD_NULL
 // in an error)
 const UNKNOWN RetType = C.GD_UNKNOWN
 
-// array2type accepts a pointer to a slice of numeric values and returns the
+// parray2type accepts a pointer to a slice of numeric values and returns the
 // matching RetType from the GetData library and an unsafe.Pointer to the
 // first value in the underlying array.
-func array2type(a interface{}) (RetType, unsafe.Pointer) {
+// Differs from array2type in that you use this if you want to be able to resize.
+func parray2type(a interface{}) (RetType, unsafe.Pointer) {
 	switch v := a.(type) {
 	case *[]uint8:
 		return UINT8, unsafe.Pointer(&(*v)[0])
@@ -90,6 +91,40 @@ func array2type(a interface{}) (RetType, unsafe.Pointer) {
 		return COMPLEX128, unsafe.Pointer(&(*v)[0])
 	default:
 		return UNKNOWN, nil
+	}
+}
+
+// array2type accepts a slice of numeric values and returns the
+// matching RetType from the GetData library and an unsafe.Pointer to the
+// first value in the underlying array.
+func array2type(a interface{}) (RetType, unsafe.Pointer, int) {
+	switch v := a.(type) {
+	case []uint8:
+		return UINT8, unsafe.Pointer(&v[0]), len(v)
+	case []int8:
+		return INT8, unsafe.Pointer(&v[0]), len(v)
+	case []uint16:
+		return UINT16, unsafe.Pointer(&v[0]), len(v)
+	case []int16:
+		return INT16, unsafe.Pointer(&v[0]), len(v)
+	case []uint32:
+		return UINT32, unsafe.Pointer(&v[0]), len(v)
+	case []int32:
+		return INT32, unsafe.Pointer(&v[0]), len(v)
+	case []uint64:
+		return UINT64, unsafe.Pointer(&v[0]), len(v)
+	case []int64:
+		return INT64, unsafe.Pointer(&v[0]), len(v)
+	case []float32:
+		return FLOAT32, unsafe.Pointer(&v[0]), len(v)
+	case []float64:
+		return FLOAT64, unsafe.Pointer(&v[0]), len(v)
+	case []complex64:
+		return COMPLEX64, unsafe.Pointer(&v[0]), len(v)
+	case []complex128:
+		return COMPLEX128, unsafe.Pointer(&v[0]), len(v)
+	default:
+		return UNKNOWN, nil, 0
 	}
 }
 
