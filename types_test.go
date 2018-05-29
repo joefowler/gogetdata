@@ -75,3 +75,62 @@ func TestTypes(t *testing.T) {
 		t.Errorf("array2type(&[]complex128) returns 0x%x, want COMPLEX128=0x%x", tval, COMPLEX128)
 	}
 }
+
+func TestPointerTypes(t *testing.T) {
+	var u8 uint8
+	if tval, ptr := pointer2type(&u8); tval != UINT8 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT8=0x%x, nil", tval, ptr, UINT8)
+	}
+	var i8 int8
+	if tval, ptr := pointer2type(&i8); tval != INT8 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT8=0x%x, nil", tval, ptr, INT8)
+	}
+	var u16 uint16
+	if tval, ptr := pointer2type(&u16); tval != UINT16 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT16=0x%x, nil", tval, ptr, UINT16)
+	}
+	var i16 int16
+	if tval, ptr := pointer2type(&i16); tval != INT16 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT16=0x%x, nil", tval, ptr, INT16)
+	}
+	var u32 uint32
+	if tval, ptr := pointer2type(&u32); tval != UINT32 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT32=0x%x, nil", tval, ptr, UINT32)
+	}
+	var i32 int32
+	if tval, ptr := pointer2type(&i32); tval != INT32 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT32=0x%x, nil", tval, ptr, INT32)
+	}
+	var u64 uint64
+	if tval, ptr := pointer2type(&u64); tval != UINT64 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT64=0x%x, nil", tval, ptr, UINT64)
+	}
+	var i64 int64
+	if tval, ptr := pointer2type(&i64); tval != INT64 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT64=0x%x, nil", tval, ptr, INT64)
+	}
+	var f32 float32
+	if tval, ptr := pointer2type(&f32); tval != FLOAT32 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want FLOAT32=0x%x, nil", tval, ptr, FLOAT32)
+	}
+	var f64 float64
+	if tval, ptr := pointer2type(&f64); tval != FLOAT64 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want FLOAT64=0x%x, nil", tval, ptr, FLOAT64)
+	}
+	var c64 complex64
+	if tval, ptr := pointer2type(&c64); tval != COMPLEX64 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want COMPLEX64=0x%x, nil", tval, ptr, COMPLEX64)
+	}
+	var c128 complex128
+	if tval, ptr := pointer2type(&c128); tval != COMPLEX128 {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want COMPLEX128=0x%x, nil", tval, ptr, COMPLEX128)
+	}
+	var s string
+	if tval, ptr := pointer2type(&s); tval != STRING {
+		t.Errorf("pointer2type(&val) returns 0x%x, %p; want STRING=0x%x, nil", tval, ptr, STRING)
+	}
+
+	if tval, ptr := pointer2type(u8); tval != UNKNOWN || ptr != nil {
+		t.Errorf("pointer2type(val) returns 0x%x, %p; want UNKNOWN=0x%x, nil", tval, ptr, UNKNOWN)
+	}
+}

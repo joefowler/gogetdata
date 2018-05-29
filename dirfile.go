@@ -225,64 +225,56 @@ func (df *Dirfile) MplexLookback(lookback int) {
 	C.gd_mplex_lookback(df.d, C.int(lookback))
 }
 
-// GetConstantInt32 returns an int32 for the constant or metadata field named fieldcode
-func (df Dirfile) GetConstantInt32(fieldcode string) (int32, error) {
+// GetConstant fills the numeric type pointed to by inptry with the constant or metadata field named fieldcode
+func (df Dirfile) GetConstant(fieldcode string, inptr interface{}) error {
+	typecode, uptr := pointer2type(inptr)
+	if typecode == UNKNOWN {
+		return fmt.Errorf("GetConstant called with ptr not a pointer to string or numeric type")
+	}
+
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
-	result := C.int(32)
-	errcode := C.gd_get_constant(df.d, fcode, C.GD_INT32, unsafe.Pointer(&result))
+	errcode := C.gd_get_constant(df.d, fcode, C.gd_type_t(typecode), uptr)
 	if errcode != C.GD_E_OK {
-		return 0.0, df.Error()
+		return df.Error()
 	}
-	return int32(result), nil
+	return nil
+}
+
+// GetConstantInt32 returns an int32 for the constant or metadata field named fieldcode
+func (df Dirfile) GetConstantInt32(fieldcode string) (int32, error) {
+	var c int32
+	return c, df.GetConstant(fieldcode, &c)
+}
+
+// GetConstantInt64 returns an int64 for the constant or metadata field named fieldcode
+func (df Dirfile) GetConstantInt64(fieldcode string) (int64, error) {
+	var c int64
+	return c, df.GetConstant(fieldcode, &c)
 }
 
 // GetConstantFloat32 returns a float32 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantFloat32(fieldcode string) (float32, error) {
-	fcode := C.CString(fieldcode)
-	defer C.free(unsafe.Pointer(fcode))
-	result := C.float(3.2)
-	errcode := C.gd_get_constant(df.d, fcode, C.GD_FLOAT32, unsafe.Pointer(&result))
-	if errcode != C.GD_E_OK {
-		return 0.0, df.Error()
-	}
-	return float32(result), nil
+	var c float32
+	return c, df.GetConstant(fieldcode, &c)
 }
 
 // GetConstantFloat64 returns a float64 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantFloat64(fieldcode string) (float64, error) {
-	fcode := C.CString(fieldcode)
-	defer C.free(unsafe.Pointer(fcode))
-	result := C.double(6.4)
-	errcode := C.gd_get_constant(df.d, fcode, C.GD_FLOAT64, unsafe.Pointer(&result))
-	if errcode != C.GD_E_OK {
-		return 0.0, df.Error()
-	}
-	return float64(result), nil
+	var c float64
+	return c, df.GetConstant(fieldcode, &c)
 }
 
 // GetConstantComplex64 returns a complex64 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantComplex64(fieldcode string) (complex64, error) {
-	fcode := C.CString(fieldcode)
-	defer C.free(unsafe.Pointer(fcode))
-	result := C.complexfloat(6.4 + 1i)
-	errcode := C.gd_get_constant(df.d, fcode, C.GD_COMPLEX64, unsafe.Pointer(&result))
-	if errcode != C.GD_E_OK {
-		return 0.0, df.Error()
-	}
-	return complex64(result), nil
+	var c complex64
+	return c, df.GetConstant(fieldcode, &c)
 }
 
 // GetConstantComplex128 returns a complex128 for the constant or metadata field named fieldcode
 func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
-	fcode := C.CString(fieldcode)
-	defer C.free(unsafe.Pointer(fcode))
-	result := C.complexdouble(12.8 + 1i)
-	errcode := C.gd_get_constant(df.d, fcode, C.GD_COMPLEX128, unsafe.Pointer(&result))
-	if errcode != C.GD_E_OK {
-		return 0.0, df.Error()
-	}
-	return complex128(result), nil
+	var c complex128
+	return c, df.GetConstant(fieldcode, &c)
 }
 
 // Dirfilename returns the full path to the dirfile

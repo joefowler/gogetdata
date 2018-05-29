@@ -204,6 +204,19 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetConstantInt32 returned %d on non-existent field, want error", i32)
 	}
 
+	// #15: constant (int64) check
+	i64, err := d.GetConstantInt64("const")
+	if err != nil {
+		t.Error("Could not GetConstantInt64: ", err)
+	}
+	if i64 != 5 {
+		t.Errorf("GetConstantInt64 returns %d, want 5", i64)
+	}
+	i64, err = d.GetConstantInt64("doesnt exist")
+	if err == nil {
+		t.Errorf("GetConstantInt64 returned %d on non-existent field, want error", i64)
+	}
+
 	// #17: constant (float) check
 	f32, err := d.GetConstantFloat32("const")
 	if err != nil {

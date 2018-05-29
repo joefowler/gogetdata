@@ -93,55 +93,37 @@ func array2type(a interface{}) (RetType, unsafe.Pointer) {
 	}
 }
 
-// func object2type(object interface{}) RetType {
-// 	switch object.(type) {
-// 	case uint8:
-// 		return UINT8
-// 	case int8:
-// 		return INT8
-// 	case uint16:
-// 		return UINT16
-// 	case int16:
-// 		return INT16
-// 	case uint32:
-// 		return UINT32
-// 	case int32:
-// 		return INT32
-// 	case uint64:
-// 		return UINT64
-// 	case int64:
-// 		return INT64
-// 	case float32:
-// 		return FLOAT32
-// 	case float64:
-// 		return FLOAT64
-// 	case complex64:
-// 		return COMPLEX64
-// 	case complex128:
-// 		return COMPLEX128
-// 	}
-// 	return UNKNOWN
-// }
-
-// func array2type(a interface{}) (string, unsafe.Pointer) {
-// 	switch v := a.(type) {
-// 	case []int64:
-// 		return "**int64**", unsafe.Pointer(&v[0])
-// 	case []uint32:
-// 		return "**uint32**", unsafe.Pointer(&v[0])
-// 	default:
-// 		return "Unknown", nil
-// 	}
-// }
-//
-// func TestGet(t *testing.T) {
-// 	a := make([]int64, 4)
-// 	b := make([]uint32, 3)
-// 	c := make([]float32, 2)
-// 	s, u := array2type(a)
-// 	fmt.Printf("a: %s %v\n", s, u)
-// 	s, u = array2type(b)
-// 	fmt.Printf("b: %s %v\n", s, u)
-// 	s, u = array2type(c)
-// 	fmt.Printf("c: %s %v\n", s, u)
-// }
+// pointer2type accepts a pointer to a numeric value or string and returns the
+// matching RetType from the GetData library and an unsafe.Pointer to the
+// first value in the underlying array.
+func pointer2type(object interface{}) (RetType, unsafe.Pointer) {
+	switch p := object.(type) {
+	case *uint8:
+		return UINT8, unsafe.Pointer(p)
+	case *int8:
+		return INT8, unsafe.Pointer(p)
+	case *uint16:
+		return UINT16, unsafe.Pointer(p)
+	case *int16:
+		return INT16, unsafe.Pointer(p)
+	case *uint32:
+		return UINT32, unsafe.Pointer(p)
+	case *int32:
+		return INT32, unsafe.Pointer(p)
+	case *uint64:
+		return UINT64, unsafe.Pointer(p)
+	case *int64:
+		return INT64, unsafe.Pointer(p)
+	case *float32:
+		return FLOAT32, unsafe.Pointer(p)
+	case *float64:
+		return FLOAT64, unsafe.Pointer(p)
+	case *complex64:
+		return COMPLEX64, unsafe.Pointer(p)
+	case *complex128:
+		return COMPLEX128, unsafe.Pointer(p)
+	case *string:
+		return STRING, unsafe.Pointer(p)
+	}
+	return UNKNOWN, nil
+}
