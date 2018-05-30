@@ -112,61 +112,57 @@ func TestArrayTypes(t *testing.T) {
 	}
 }
 
-func TestPointerTypes(t *testing.T) {
-	var u8 uint8
-	if tval, ptr := pointer2type(&u8); tval != UINT8 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT8=0x%x, nil", tval, ptr, UINT8)
-	}
-	var i8 int8
-	if tval, ptr := pointer2type(&i8); tval != INT8 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT8=0x%x, nil", tval, ptr, INT8)
-	}
-	var u16 uint16
-	if tval, ptr := pointer2type(&u16); tval != UINT16 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT16=0x%x, nil", tval, ptr, UINT16)
-	}
-	var i16 int16
-	if tval, ptr := pointer2type(&i16); tval != INT16 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT16=0x%x, nil", tval, ptr, INT16)
-	}
-	var u32 uint32
-	if tval, ptr := pointer2type(&u32); tval != UINT32 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT32=0x%x, nil", tval, ptr, UINT32)
-	}
-	var i32 int32
-	if tval, ptr := pointer2type(&i32); tval != INT32 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT32=0x%x, nil", tval, ptr, INT32)
-	}
-	var u64 uint64
-	if tval, ptr := pointer2type(&u64); tval != UINT64 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want UINT64=0x%x, nil", tval, ptr, UINT64)
-	}
-	var i64 int64
-	if tval, ptr := pointer2type(&i64); tval != INT64 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want INT64=0x%x, nil", tval, ptr, INT64)
-	}
-	var f32 float32
-	if tval, ptr := pointer2type(&f32); tval != FLOAT32 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want FLOAT32=0x%x, nil", tval, ptr, FLOAT32)
-	}
-	var f64 float64
-	if tval, ptr := pointer2type(&f64); tval != FLOAT64 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want FLOAT64=0x%x, nil", tval, ptr, FLOAT64)
-	}
-	var c64 complex64
-	if tval, ptr := pointer2type(&c64); tval != COMPLEX64 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want COMPLEX64=0x%x, nil", tval, ptr, COMPLEX64)
-	}
-	var c128 complex128
-	if tval, ptr := pointer2type(&c128); tval != COMPLEX128 {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want COMPLEX128=0x%x, nil", tval, ptr, COMPLEX128)
-	}
-	var s string
-	if tval, ptr := pointer2type(&s); tval != STRING {
-		t.Errorf("pointer2type(&val) returns 0x%x, %p; want STRING=0x%x, nil", tval, ptr, STRING)
+func TestScalarTypes(t *testing.T) {
+	type ScalarTest struct {
+		val   interface{}
+		ptr   interface{}
+		tname string
+		rtype RetType
 	}
 
-	if tval, ptr := pointer2type(u8); tval != UNKNOWN || ptr != nil {
+	var u8 uint8
+	var i8 int8
+	var u16 uint16
+	var i16 int16
+	var u32 uint32
+	var i32 int32
+	var u64 uint64
+	var i64 int64
+	var f32 float32
+	var f64 float64
+	var c64 complex64
+	var c128 complex128
+	var s string
+	var tests = []ScalarTest{
+		{s, &s, "STRING", STRING},
+		{i8, &i8, "INT8", INT8},
+		{u8, &u8, "UINT8", UINT8},
+		{i16, &i16, "INT16", INT16},
+		{u16, &u16, "UINT16", UINT16},
+		{i32, &i32, "INT32", INT32},
+		{u32, &u32, "UINT32", UINT32},
+		{i64, &i64, "INT64", INT64},
+		{u64, &u64, "UINT64", UINT64},
+		{f32, &f32, "FLOAT32", FLOAT32},
+		{f64, &f64, "FLOAT64", FLOAT64},
+		{c64, &c64, "COMPLEX64", COMPLEX64},
+		{c128, &c128, "COMPLEX128", COMPLEX128},
+	}
+	for _, test := range tests {
+		if tval, ptr := pointer2type(test.ptr); tval != test.rtype {
+			t.Errorf("pointer2type(&val) returns 0x%x, %p; want %s=0x%x, nil", tval, ptr, test.tname, test.rtype)
+		}
+		if tval, ptr := value2type(test.val); tval != test.rtype {
+			t.Errorf("value2type(val) returns 0x%x, %p; want %s=0x%x, nil", tval, ptr, test.tname, test.rtype)
+		}
+	}
+
+	type Incorrect int64
+	var wrong Incorrect
+	if tval, ptr := pointer2type(wrong); tval != UNKNOWN || ptr != nil {
 		t.Errorf("pointer2type(val) returns 0x%x, %p; want UNKNOWN=0x%x, nil", tval, ptr, UNKNOWN)
+	}
+	if tval, ptr := value2type(wrong); tval != UNKNOWN || ptr != nil {
+		t.Errorf("value2type(val) returns 0x%x, %p; want UNKNOWN=0x%x, nil", tval, ptr, UNKNOWN)
 	}
 }
