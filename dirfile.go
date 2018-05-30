@@ -326,6 +326,25 @@ func (df Dirfile) GetString(fieldcode string) (string, error) {
 	return C.GoString(cresult), nil
 }
 
+// Strings returns the value of all STRING fields (including metafields)
+func (df Dirfile) Strings() ([]string, error) {
+	cptr := C.gd_strings(df.d)
+	if cptr == (**C.char)(C.NULL) {
+		return nil, fmt.Errorf("Dirfile.Strings returned NULL")
+	}
+	var result []string
+	listend := (*C.char)(C.NULL)
+	cstr0 := *(**C.char)(cptr)
+	for cstr0 != listend {
+		result = append(result, C.GoString(cstr0))
+		// fmt.Printf("cptr=%p, cstr0=%p, result=%s ", cptr, cstr0, result)
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(&cstr0)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *(**C.char)(cptr)
+		// fmt.Printf("new cptr=%p, cstr0=%p\n", cptr, cstr0)
+	}
+	return result, nil
+}
+
 // PutData stores data to a vector field in the dirfile (incl. metafields)
 // data should be a slice of numeric data, e.g.
 // var d []int32{4,5,6,7,8}

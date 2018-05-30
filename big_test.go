@@ -799,6 +799,21 @@ func TestRead(t *testing.T) {
 		t.Errorf("ArrayLen(\"carray\") returned %d, want 6", l177)
 	}
 
+	// #199: Strings test
+	s199, err := d.Strings()
+	if err != nil {
+		t.Error("Strings() failed: ", err)
+	} else {
+		// expected := []string{"Lorem ipsum", "", "Arthur Dent"}
+		// TODO: use the above
+		expected := []string{"Arthur Dent"}
+		for i := 0; i < len(expected); i++ {
+			if s199[i] != expected[i] {
+				t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
+			}
+		}
+	}
+
 	// #208: Sync check
 	err = d.Sync("data")
 	if err != nil {
