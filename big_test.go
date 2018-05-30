@@ -743,6 +743,55 @@ func TestRead(t *testing.T) {
 			}
 		}
 	}
+	err = d.GetCarray("sdfsdfasf", &a158)
+	if err == nil {
+		t.Error("GetCarray did not error when passed an invalid field name")
+	}
+	err = d.GetCarray("carray", &invalid)
+	if err == nil {
+		t.Error("GetCarray did not error when passed an invalid pointer")
+	}
+
+	// #159: GetCarray test
+	err = d.GetCarraySlice("carray", 2, 2, &a158)
+	if err != nil {
+		t.Error("Could not GetCarraySlice: ", err)
+	} else {
+		for i := 0; i < 2; i++ {
+			if math.Abs(a158[i]-1.1*float64(i+3)) > 1e-6 {
+				t.Errorf("GetCarraySlice returns v[%d]=%.2f, want %.2f", i, a158[i], 1.1*float64(i+1))
+			}
+		}
+	}
+	err = d.GetCarraySlice("sdfsdfasf", 2, 2, &a158)
+	if err == nil {
+		t.Error("GetCarraySlice did not error when passed an invalid field name")
+	}
+	err = d.GetCarraySlice("carray", 2, 2, &invalid)
+	if err == nil {
+		t.Error("GetCarraySlice did not error when passed an invalid pointer")
+	}
+
+	// #168: PutCarray test
+	p168 := []float64{9.6, 8.5, 7.4, 6.3, 5.2, 4.1}
+	err = d.PutCarray("carray", p168)
+	if err != nil {
+		t.Error("PutCarray failed: ", err)
+	}
+	err = d.GetCarray("carray", &a158)
+	if err != nil {
+		t.Error("GetCarray failed on test 168: ", err)
+	} else {
+		for i := 0; i < 6; i++ {
+			if math.Abs(a158[i]-9.6+1.1*float64(i)) > 1e-6 {
+				t.Errorf("GetCarray returns v[%d]=%.2f, want %.2f", i, a158[i], 9.6+1.1*float64(i))
+			}
+		}
+	}
+	err = d.PutCarray("sdfsdfasf", p168)
+	if err == nil {
+		t.Error("PutCarray did not error when passed an invalid field name")
+	}
 
 	// #177: ArrayLen test
 	l177 := d.ArrayLen("carray")

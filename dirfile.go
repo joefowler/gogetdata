@@ -278,7 +278,8 @@ func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	return c, df.GetConstant(fieldcode, &c)
 }
 
-// GetCarray
+// GetCarray fills the numeric array pointed to by out with a list of the values
+// of all elements in a CARRAY field (including metafields).
 func (df Dirfile) GetCarray(fieldcode string, out interface{}) error {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -292,6 +293,25 @@ func (df Dirfile) GetCarray(fieldcode string, out interface{}) error {
 	}
 	return nil
 }
+
+// GetCarraySlice fills the numeric array pointed to by out with a list a portion of
+// the elements in a CARRAY field (including metafields).
+func (df Dirfile) GetCarraySlice(fieldcode string, start, n uint, out interface{}) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	retType, ptr := parray2type(out)
+	if retType == UNKNOWN || retType == STRING || ptr == C.NULL {
+		return fmt.Errorf("GetCarray out variable was not a pointer to numeric slice")
+	}
+	result := int(C.gd_get_carray_slice(df.d, fcode, C.ulong(start), C.size_t(n), C.gd_type_t(retType), ptr))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// func (df Dirfile) GetCarrays(fieldcode string, retType RetType) []
+// Hmm. Not sure how to do this one!
 
 // GetString returns the value of a STRING field (including metafields)
 func (df Dirfile) GetString(fieldcode string) (string, error) {
@@ -327,6 +347,7 @@ func (df *Dirfile) PutData(fieldcode string, firstFrame, firstSample int, data i
 }
 
 // PutConstant stores the value of a CONST field (including metafields)
+// data should be a value of some numeric type.
 func (df *Dirfile) PutConstant(fieldcode string, data interface{}) error {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -335,7 +356,19 @@ func (df *Dirfile) PutConstant(fieldcode string, data interface{}) error {
 		return fmt.Errorf("PutConstant data variable was not a numeric value")
 	}
 	n := C.gd_put_constant(df.d, fcode, C.gd_type_t(dType), ptr)
-	if n < 0 {
+	if n != 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// PutCarray stores an entire CARRAY field (including metafields)
+func (df *Dirfile) PutCarray(fieldcode string, array interface{}) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	dType, ptr, _ := array2type(array)
+	n := C.gd_put_carray(df.d, fcode, C.gd_type_t(dType), ptr)
+	if n != 0 {
 		return df.Error()
 	}
 	return nil
