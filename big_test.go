@@ -195,9 +195,15 @@ func TestRead(t *testing.T) {
 	i32, err := d.GetConstantInt32("const")
 	if err != nil {
 		t.Error("Could not GetConstantInt32: ", err)
-	}
-	if i32 != 5 {
+	} else if i32 != 5 {
 		t.Errorf("GetConstantInt32 returns %d, want 5", i32)
+	}
+	i32 = -9
+	err = d.GetConstant("const", &i32)
+	if err != nil {
+		t.Error("Could not GetConstant for &int32: ", err)
+	} else if i32 != 5 {
+		t.Errorf("GetConstant for int32 returns %d, want 5", i32)
 	}
 	i32, err = d.GetConstantInt32("doesnt exist")
 	if err == nil {
@@ -208,9 +214,15 @@ func TestRead(t *testing.T) {
 	i64, err := d.GetConstantInt64("const")
 	if err != nil {
 		t.Error("Could not GetConstantInt64: ", err)
-	}
-	if i64 != 5 {
+	} else if i64 != 5 {
 		t.Errorf("GetConstantInt64 returns %d, want 5", i64)
+	}
+	i64 = -9
+	err = d.GetConstant("const", &i64)
+	if err != nil {
+		t.Error("Could not GetConstant for int64: ", err)
+	} else if i64 != 5 {
+		t.Errorf("GetConstant for int64 returns %d, want 5", i64)
 	}
 	i64, err = d.GetConstantInt64("doesnt exist")
 	if err == nil {
@@ -221,20 +233,33 @@ func TestRead(t *testing.T) {
 	f32, err := d.GetConstantFloat32("const")
 	if err != nil {
 		t.Error("Could not GetConstantFloat32: ", err)
-	}
-	if f32 != 5.5 {
+	} else if f32 != 5.5 {
 		t.Errorf("GetConstantFloat32 returns %f, want 5.5", f32)
+	}
+	f32 = -9
+	err = d.GetConstant("const", &f32)
+	if err != nil {
+		t.Error("Could not GetConstant for float32: ", err)
+	} else if f32 != 5.5 {
+		t.Errorf("GetConstant for float32 returns %f, want 5.5", f32)
 	}
 	f32, err = d.GetConstantFloat32("doesnt exist")
 	if err == nil {
 		t.Errorf("GetConstantFloat32 returned %f on non-existent field, want error", f32)
 	}
+
 	f64, err := d.GetConstantFloat64("const")
 	if err != nil {
 		t.Errorf("Could not GetConstantFloat64")
-	}
-	if f64 != 5.5 {
+	} else if f64 != 5.5 {
 		t.Errorf("GetConstantFloat64 returns %f, want 5.5", f64)
+	}
+	f64 = -9.0
+	err = d.GetConstant("const", &f64)
+	if err != nil {
+		t.Errorf("Could not GetConstant for float64")
+	} else if f64 != 5.5 {
+		t.Errorf("GetConstant for float64 returns %f, want 5.5", f64)
 	}
 	f64, err = d.GetConstantFloat64("doesnt exist")
 	if err == nil {
@@ -245,19 +270,32 @@ func TestRead(t *testing.T) {
 	c64, err := d.GetConstantComplex64("const")
 	if err != nil {
 		t.Errorf("Could not GetConstantComplex64")
-	}
-	if c64 != 5.5 {
+	} else if c64 != 5.5 {
 		t.Errorf("GetConstantComplex64 returns %f, want 5.5", c64)
+	}
+	c64 = complex(-9, 4)
+	err = d.GetConstant("const", &c64)
+	if err != nil {
+		t.Errorf("Could not GetConstant for complex64")
+	} else if c64 != 5.5 {
+		t.Errorf("GetConstant for complex64 returns %f, want 5.5", c64)
 	}
 	c64, err = d.GetConstantComplex64("doesnt exist")
 	if err == nil {
 		t.Errorf("GetConstantComplex64 returned %f on non-existent field, want error", c64)
 	}
+
 	c128, err := d.GetConstantComplex128("const")
 	if err != nil {
 		t.Errorf("Could not GetConstantComplex128")
+	} else if c128 != 5.5 {
+		t.Errorf("GetConstant for complex128 returns %f, want 5.5", c128)
 	}
-	if c128 != 5.5 {
+	c128 = complex(-7, 5)
+	err = d.GetConstant("const", &c128)
+	if err != nil {
+		t.Errorf("Could not GetConstant for complex128")
+	} else if c128 != 5.5 {
 		t.Errorf("GetConstantComplex128 returns %f, want 5.5", c128)
 	}
 	c128, err = d.GetConstantComplex128("doesnt exist")
@@ -461,6 +499,76 @@ func TestRead(t *testing.T) {
 			if vectors[i] != truevnames[i] {
 				t.Errorf("FieldList[%d]=\"%s\", want \"%s\"", i, vectors[i], truevnames[i])
 			}
+		}
+	}
+
+	// #86: PutConstant int32 check
+	err = d.PutConstant("const", int32(86))
+	if err != nil {
+		t.Error("PutConstant error in test 86: ", err)
+	} else {
+		var v int32
+		err = d.GetConstant("const", &v)
+		if err != nil {
+			t.Error("GetConstant error in test 86: ", err)
+		} else if v != 86 {
+			t.Errorf("PutConstant(int32(86)) then GetConstant reads %d, want 86", v)
+		}
+	}
+
+	// #88: PutConstant uint64 check
+	err = d.PutConstant("const", uint64(88))
+	if err != nil {
+		t.Error("PutConstant error in test 88: ", err)
+	} else {
+		var v uint64
+		err = d.GetConstant("const", &v)
+		if err != nil {
+			t.Error("GetConstant error in test 88: ", err)
+		} else if v != 88 {
+			t.Errorf("PutConstant(uint64(88)) then GetConstant reads %d, want 88", v)
+		}
+	}
+
+	// #89: PutConstant int64 check
+	err = d.PutConstant("const", int64(89))
+	if err != nil {
+		t.Error("PutConstant error in test 89: ", err)
+	} else {
+		var v int64
+		err = d.GetConstant("const", &v)
+		if err != nil {
+			t.Error("GetConstant error in test 89: ", err)
+		} else if v != 89 {
+			t.Errorf("PutConstant(int64(89)) then GetConstant reads %d, want 89", v)
+		}
+	}
+
+	// #91: PutConstant float64 check
+	err = d.PutConstant("const", float64(91))
+	if err != nil {
+		t.Error("PutConstant error in test 91: ", err)
+	} else {
+		var v float64
+		err = d.GetConstant("const", &v)
+		if err != nil {
+			t.Error("GetConstant error in test 91: ", err)
+		} else if v != 91 {
+			t.Errorf("PutConstant(float64(91)) then GetConstant reads %.2f, want 91.00", v)
+		}
+	}
+
+	// #93: PutConstant complex64 check
+	err = d.PutConstant("const", complex64(93))
+	if err != nil {
+		t.Error("PutConstant error in test 93: ", err)
+	} else {
+		var v complex64
+		err = d.GetConstant("const", &v)
+		if err != nil {
+			t.Error("GetConstant error in test 93: ", err)
+		} else if v != 93 {
+			t.Errorf("PutConstant(complex64(93)) then GetConstant reads %.2f, want 93.00", v)
 		}
 	}
 

@@ -297,6 +297,21 @@ func (df *Dirfile) PutData(fieldcode string, firstFrame, firstSample int, data i
 	return int(n), nil
 }
 
+// PutConstant stores the value of a CONST field (including metafields)
+func (df *Dirfile) PutConstant(fieldcode string, data interface{}) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	dType, ptr := value2type(data)
+	if dType == UNKNOWN || dType == NULLTYPE || ptr == C.NULL {
+		return fmt.Errorf("PutConstant data variable was not a numeric value")
+	}
+	n := C.gd_put_constant(df.d, fcode, C.gd_type_t(dType), ptr)
+	if n < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // Dirfilename returns the full path to the dirfile
 func (df Dirfile) Dirfilename() string {
 	result := C.gd_dirfilename(df.d)

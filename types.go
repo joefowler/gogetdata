@@ -130,7 +130,7 @@ func array2type(a interface{}) (RetType, unsafe.Pointer, int) {
 
 // pointer2type accepts a pointer to a numeric value or string and returns the
 // matching RetType from the GetData library and an unsafe.Pointer to the
-// first value in the underlying array.
+// underlying value.
 func pointer2type(object interface{}) (RetType, unsafe.Pointer) {
 	switch p := object.(type) {
 	case *uint8:
@@ -159,6 +159,41 @@ func pointer2type(object interface{}) (RetType, unsafe.Pointer) {
 		return COMPLEX128, unsafe.Pointer(p)
 	case *string:
 		return STRING, unsafe.Pointer(p)
+	}
+	return UNKNOWN, nil
+}
+
+// value2type accepts a numeric value or string and returns the
+// matching RetType from the GetData library and an unsafe.Pointer to the
+// underlying value.
+func value2type(object interface{}) (RetType, unsafe.Pointer) {
+	switch p := object.(type) {
+	case uint8:
+		return UINT8, unsafe.Pointer(&p)
+	case int8:
+		return INT8, unsafe.Pointer(&p)
+	case uint16:
+		return UINT16, unsafe.Pointer(&p)
+	case int16:
+		return INT16, unsafe.Pointer(&p)
+	case uint32:
+		return UINT32, unsafe.Pointer(&p)
+	case int32:
+		return INT32, unsafe.Pointer(&p)
+	case uint64:
+		return UINT64, unsafe.Pointer(&p)
+	case int64:
+		return INT64, unsafe.Pointer(&p)
+	case float32:
+		return FLOAT32, unsafe.Pointer(&p)
+	case float64:
+		return FLOAT64, unsafe.Pointer(&p)
+	case complex64:
+		return COMPLEX64, unsafe.Pointer(&p)
+	case complex128:
+		return COMPLEX128, unsafe.Pointer(&p)
+	case string:
+		return STRING, unsafe.Pointer(&p)
 	}
 	return UNKNOWN, nil
 }
