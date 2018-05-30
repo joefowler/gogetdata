@@ -89,6 +89,8 @@ func parray2type(a interface{}) (RetType, unsafe.Pointer) {
 		return COMPLEX64, unsafe.Pointer(&(*v)[0])
 	case *[]complex128:
 		return COMPLEX128, unsafe.Pointer(&(*v)[0])
+	case *[]string:
+		return STRING, unsafe.Pointer(&(*v)[0])
 	default:
 		return UNKNOWN, nil
 	}
@@ -123,6 +125,8 @@ func array2type(a interface{}) (RetType, unsafe.Pointer, int) {
 		return COMPLEX64, unsafe.Pointer(&v[0]), len(v)
 	case []complex128:
 		return COMPLEX128, unsafe.Pointer(&v[0]), len(v)
+	case []string:
+		return STRING, unsafe.Pointer(&v[0]), len(v)
 	default:
 		return UNKNOWN, nil, 0
 	}
