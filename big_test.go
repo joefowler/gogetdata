@@ -3,6 +3,7 @@ package getdata
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strings"
 	"testing"
@@ -729,7 +730,27 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not Close an invalid dirfile")
 	}
 
-	// #208 sync check
+	// #158: GetCarray test
+	a158 := make([]float64, 8)
+	err = d.GetCarray("carray", &a158)
+	if err != nil {
+		t.Error("Could not GetCarray: ", err)
+	} else {
+		L := d.ArrayLen("carray")
+		for i := 0; i < L; i++ {
+			if math.Abs(a158[i]-1.1*float64(i+1)) > 1e-6 {
+				t.Errorf("GetCarray returns v[%d]=%.2f, want %.2f", i, a158[i], 1.1*float64(i+1))
+			}
+		}
+	}
+
+	// #177: ArrayLen test
+	l177 := d.ArrayLen("carray")
+	if l177 != 6 {
+		t.Errorf("ArrayLen(\"carray\") returned %d, want 6", l177)
+	}
+
+	// #208: Sync check
 	err = d.Sync("data")
 	if err != nil {
 		t.Errorf("Could not call Sync on a field")

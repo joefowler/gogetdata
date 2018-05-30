@@ -278,6 +278,20 @@ func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	return c, df.GetConstant(fieldcode, &c)
 }
 
+// GetCarray
+func (df Dirfile) GetCarray(fieldcode string, out interface{}) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	retType, ptr := parray2type(out)
+	if retType == UNKNOWN || retType == STRING || ptr == C.NULL {
+		return fmt.Errorf("GetCarray out variable was not a pointer to numeric slice")
+	}
+	result := int(C.gd_get_carray(df.d, fcode, C.gd_type_t(retType), ptr))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
 
 // GetString returns the value of a STRING field (including metafields)
 func (df Dirfile) GetString(fieldcode string) (string, error) {
@@ -361,8 +375,15 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 	return NewFragment(&df, n)
 }
 
+// ArrayLen returns the number of elements in a scalar field (CARRAY, CONST,
+// or STRING)
+func (df Dirfile) ArrayLen(fieldcode string) int {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return int(C.gd_array_len(df.d, fcode))
+}
+
 // NEntries returns the number of fields in the dirfile satisfying various criteria.
-// d
 func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
