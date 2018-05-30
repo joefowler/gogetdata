@@ -126,9 +126,9 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	// #6: getdata (int64) check
+	// #6: getdata (int64) check and check FRAMEHERE
 	u2 := make([]uint64, 8)
-	n, err = d.GetData("data", 5, 0, 1, 0, &u2)
+	n, err = d.GetData("data", FRAMEHERE, 0, 1, 0, &u2)
 	if err != nil {
 		t.Error("Could not GetData: ", err)
 	} else if len(u2) < 8 {
@@ -137,7 +137,7 @@ func TestRead(t *testing.T) {
 		t.Errorf("GetData returned %d, want 8", n)
 	} else {
 		for i := 0; i < 8; i++ {
-			if u2[i] != uint64(41+i) {
+			if u2[i] != uint64(49+i) {
 				t.Errorf("GetData out[%d]=%d, want %d", i, u2[i], 41+i)
 			}
 		}
