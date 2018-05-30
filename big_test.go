@@ -502,6 +502,16 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #81: GetString check
+	st, err := d.GetString("string")
+	if err != nil {
+		t.Error("GetString error in test 86: ", err)
+	} else {
+		if st != "Zaphod Beeblebrox" {
+			t.Errorf("GetString returned \"%s\", want \"Zaphod Beeblebrox\"", st)
+		}
+	}
+
 	// #86: PutConstant int32 check
 	err = d.PutConstant("const", int32(86))
 	if err != nil {
@@ -569,6 +579,19 @@ func TestRead(t *testing.T) {
 			t.Error("GetConstant error in test 93: ", err)
 		} else if v != 93 {
 			t.Errorf("PutConstant(complex64(93)) then GetConstant reads %.2f, want 93.00", v)
+		}
+	}
+
+	// #94: PutString check
+	err = d.PutString("string", "Arthur Dent")
+	if err != nil {
+		t.Error("PutString error in test 94: ", err)
+	} else {
+		s, err2 := d.GetString("string")
+		if err2 != nil {
+			t.Error("GetString error in test 94: ", err2)
+		} else if s != "Arthur Dent" {
+			t.Errorf("PutString() then GetString reads %s, want \"Arthur Dent\"", s)
 		}
 	}
 

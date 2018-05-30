@@ -200,15 +200,16 @@ func (df *Dirfile) Desync(pathcheck, reopen bool) (bool, error) {
 }
 
 // GetData fetches data from a vector field in the dirfile (incl. metafields)
-// out should be a *pointer to* a slice of numeric data, e.g.
-// var d []int32
+// out should be a *pointer to* a slice of numeric data of adequate size, e.g.
+// d := make([]int32, 20)
 // df.GetData("field", 5, 0, 2, 0, &d)
+// Returns (n, err) where n is the number of samples read.
 func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, numSamples int, out interface{}) (int, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
 	// expectedSamples := numSamples + numFrames*df.
 	retType, ptr := parray2type(out)
-	if retType == UNKNOWN || ptr == C.NULL {
+	if retType == UNKNOWN || retType == STRING || ptr == C.NULL {
 		return 0, fmt.Errorf("GetData out variable was not a pointer to numeric slice")
 	}
 	n := C.gd_getdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
@@ -277,6 +278,20 @@ func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	return c, df.GetConstant(fieldcode, &c)
 }
 
+
+// GetString returns the value of a STRING field (including metafields)
+func (df Dirfile) GetString(fieldcode string) (string, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	bsize := C.size_t(256)
+	cresult := (*C.char)(C.malloc(bsize))
+	n := int(C.gd_get_string(df.d, fcode, bsize, cresult))
+	if n == 0 {
+		return "", df.Error()
+	}
+	return C.GoString(cresult), nil
+}
+
 // PutData stores data to a vector field in the dirfile (incl. metafields)
 // data should be a slice of numeric data, e.g.
 // var d []int32{4,5,6,7,8}
@@ -307,6 +322,19 @@ func (df *Dirfile) PutConstant(fieldcode string, data interface{}) error {
 	}
 	n := C.gd_put_constant(df.d, fcode, C.gd_type_t(dType), ptr)
 	if n < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// PutString stores the value of a STRING field (including metafields)
+func (df *Dirfile) PutString(fieldcode, value string) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	newval := C.CString(value)
+	defer C.free(unsafe.Pointer(newval))
+	n := C.gd_put_string(df.d, fcode, newval)
+	if n != 0 {
 		return df.Error()
 	}
 	return nil
