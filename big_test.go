@@ -447,7 +447,9 @@ func TestRead(t *testing.T) {
 		if ent.fieldType != RAWENTRY {
 			t.Errorf("Entry gets field type 0x%x, want RAW=0x%x", ent.fieldType, RAWENTRY)
 		}
-		// TODO: check fragment #
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
 		if ent.dataType != INT8 {
 			t.Errorf("Entry gets data type 0x%x, want INT8=0x%x", ent.dataType, INT8)
 		}
@@ -464,7 +466,9 @@ func TestRead(t *testing.T) {
 		if ent.fieldType != LINCOMENTRY {
 			t.Errorf("Entry gets field type 0x%x, want LINCOM=0x%x", ent.fieldType, LINCOMENTRY)
 		}
-		// TODO: check fragment #
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
 		if ent.nFields != 3 {
 			t.Errorf("Entry gets nFields=%d, want 3", ent.nFields)
 		}
@@ -498,7 +502,9 @@ func TestRead(t *testing.T) {
 		if ent.fieldType != POLYNOMENTRY {
 			t.Errorf("Entry gets field type 0x%x, want POLYNOM=0x%x", ent.fieldType, POLYNOMENTRY)
 		}
-		// TODO: check fragment #
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
 		if ent.polyOrder != 5 {
 			t.Errorf("Entry gets polyOrder=%d, want 5", ent.polyOrder)
 		}
@@ -514,6 +520,72 @@ func TestRead(t *testing.T) {
 			if ent.ca[i] != expecteda[i] {
 				t.Errorf("Entry gets ca[%d]=%f, want %f", i, ent.ca[i], expecteda[i])
 			}
+		}
+	}
+
+	// #45: Entry (linterp) check
+	ent, err = d.Entry("linterp")
+	if err != nil {
+		t.Error("Could not get Entry for linterp type: ", err)
+	} else {
+		if ent.fieldType != LINTERPENTRY {
+			t.Errorf("Entry gets field type 0x%x, want LINTERP=0x%x", ent.fieldType, LINTERPENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := "data"
+		if ent.inFields[0] != expectedf {
+			t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", 0, ent.inFields[0], expectedf)
+		}
+		if ent.table != "./lut" {
+			t.Errorf("Entry gets table=\"%s\", want \"%s\"", ent.table, "./lut")
+		}
+	}
+
+	// #46: Entry (bits) check
+	ent, err = d.Entry("bit")
+	if err != nil {
+		t.Error("Could not get Entry for bit type: ", err)
+	} else {
+		if ent.fieldType != BITENTRY {
+			t.Errorf("Entry gets field type 0x%x, want BIT=0x%x", ent.fieldType, BITENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := "data"
+		if ent.inFields[0] != expectedf {
+			t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", 0, ent.inFields[0], expectedf)
+		}
+		if ent.numbits != 4 {
+			t.Errorf("Entry gets numbits=%d, want 4", ent.numbits)
+		}
+		if ent.bitnum != 3 {
+			t.Errorf("Entry gets bitnum=%d, want 3", ent.bitnum)
+		}
+	}
+
+	// #47: Entry (sbits) check
+	ent, err = d.Entry("sbit")
+	if err != nil {
+		t.Error("Could not get Entry for sbit type: ", err)
+	} else {
+		if ent.fieldType != SBITENTRY {
+			t.Errorf("Entry gets field type 0x%x, want SBIT=0x%x", ent.fieldType, SBITENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := "data"
+		if ent.inFields[0] != expectedf {
+			t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", 0, ent.inFields[0], expectedf)
+		}
+		if ent.numbits != 6 {
+			t.Errorf("Entry gets numbits=%d, want 6", ent.numbits)
+		}
+		if ent.bitnum != 5 {
+			t.Errorf("Entry gets bitnum=%d, want 5", ent.bitnum)
 		}
 	}
 

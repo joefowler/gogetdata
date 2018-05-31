@@ -8,7 +8,6 @@ package getdata
 */
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -37,15 +36,23 @@ type polynomial struct {
 	ca        [MAXPOLYORD + 1]complex128
 }
 
+type bits struct {
+	bitnum  int
+	numbits int
+}
+
 // Entry wraps the gd_entry_t object, and is used to access field metadata
 type Entry struct {
 	name      string
 	fieldType EntryType
 	flags     uint
+	fragment  int
 	raw
 	inFields [MAXLINCOM]string
 	lincom
 	polynomial
+	table string
+	bits
 	e *C.gd_entry_t
 }
 
@@ -88,14 +95,9 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		}
 
 	case POLYNOMENTRY:
-		for i := 0; i < 152; i++ {
-			fmt.Printf("%2.2x ", ce.anon0[i])
-			if i%8 == 7 {
-				fmt.Println()
-			}
-		}
-		e.polyOrder = int(*(*C.long)(unsafe.Pointer(base)))
-		base += unsafe.Sizeof(C.long(0))
+		e.polyOrder = int(*(*C.int)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.int(0))
+		base += 4 // because of alignment
 		for i := 0; i < MAXPOLYORD+1; i++ {
 			e.a[i] = float64(*(*C.double)(unsafe.Pointer(base)))
 			base += unsafe.Sizeof(C.double(0))
@@ -104,6 +106,21 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 			e.ca[i] = complex128(*(*C.complexdouble)(unsafe.Pointer(base)))
 			base += unsafe.Sizeof(C.complexdouble(0))
 		}
+
+	case LINTERPENTRY:
+		e.table = C.GoString(*(**C.char)(unsafe.Pointer(base)))
+
+	case BITENTRY, SBITENTRY:
+		e.bitnum = int(*(*C.int)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.int(0))
+		e.numbits = int(*(*C.int)(unsafe.Pointer(base)))
+
+		// for i := 0; i < 152; i++ {
+		// 	fmt.Printf("%2.2x ", ce.anon0[i])
+		// 	if i%8 == 7 {
+		// 		fmt.Println()
+		// 	}
+		// }
 	}
 	return e
 }

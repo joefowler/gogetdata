@@ -443,7 +443,24 @@ func (df Dirfile) Entry(fieldcode string) (Entry, error) {
 	if result != 0 {
 		return Entry{}, df.Error()
 	}
-	return entryFromC(&ce), nil
+	idx, err := df.FragmentIndex(fieldcode)
+	if err != nil {
+		return Entry{}, fmt.Errorf("FragmentIndex error: %s", err.Error())
+	}
+	entry := entryFromC(&ce)
+	entry.fragment = idx
+	return entry, nil
+}
+
+// FragmentIndex returns the index of the fragment which defines a given field or alias
+func (df Dirfile) FragmentIndex(fieldcode string) (int, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := int(C.gd_fragment_index(df.d, fcode))
+	if result < 0 {
+		return 0, df.Error()
+	}
+	return result, nil
 }
 
 // NEntries returns the number of fields in the dirfile satisfying various criteria.
