@@ -675,6 +675,43 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #50: Entry (const) check
+	ent, err = d.Entry("const")
+	if err != nil {
+		t.Error("Could not get Entry for const type: ", err)
+	} else {
+		if ent.fieldType != CONSTENTRY {
+			t.Errorf("Entry gets field type 0x%x, want CONST=0x%x", ent.fieldType, CONSTENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		if ent.constType != FLOAT64 {
+			t.Errorf("Entry recip gets constType=0x%x, want FLOAT64=0x%x", ent.constType, FLOAT64)
+		}
+	}
+
+	// #51: Entry (string) check
+	ent, err = d.Entry("string")
+	if err != nil {
+		t.Error("Could not get Entry for string type: ", err)
+	} else {
+		if ent.fieldType != STRINGENTRY {
+			t.Errorf("Entry gets field type 0x%x, want STRING=0x%x", ent.fieldType, STRINGENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+	}
+
+	// #52: FragmentIndex check
+	n52, err := d.FragmentIndex("data")
+	if err != nil {
+		t.Error("Could not get FragmentIndex: ", err.Error())
+	} else if n52 != 0 {
+		t.Errorf("FragmentIndex returns %d, want 0", n52)
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {

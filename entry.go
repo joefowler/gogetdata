@@ -60,7 +60,8 @@ type Entry struct {
 	bits
 	phaseShift int64
 	reciprocal
-	e *C.gd_entry_t
+	constType RetType
+	e         *C.gd_entry_t
 }
 
 func entryFromC(ce *C.gd_entry_t) Entry {
@@ -129,6 +130,9 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 
 	case PHASEENTRY:
 		e.phaseShift = int64(*(*C.gd_int64_t)(unsafe.Pointer(base)))
+
+	case CONSTENTRY:
+		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
 
 		// for i := 0; i < 152; i++ {
 		// 	fmt.Printf("%2.2x ", ce.anon0[i])
