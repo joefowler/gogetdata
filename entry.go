@@ -41,6 +41,11 @@ type bits struct {
 	numbits int
 }
 
+type reciprocal struct {
+	dividend  float64
+	cdividend complex128
+}
+
 // Entry wraps the gd_entry_t object, and is used to access field metadata
 type Entry struct {
 	name      string
@@ -53,6 +58,8 @@ type Entry struct {
 	polynomial
 	table string
 	bits
+	phaseShift int64
+	reciprocal
 	e *C.gd_entry_t
 }
 
@@ -114,6 +121,14 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		e.bitnum = int(*(*C.int)(unsafe.Pointer(base)))
 		base += unsafe.Sizeof(C.int(0))
 		e.numbits = int(*(*C.int)(unsafe.Pointer(base)))
+
+	case RECIPENTRY:
+		e.dividend = float64(*(*C.double)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.double(0))
+		e.cdividend = complex128(*(*C.complexdouble)(unsafe.Pointer(base)))
+
+	case PHASEENTRY:
+		e.phaseShift = int64(*(*C.gd_int64_t)(unsafe.Pointer(base)))
 
 		// for i := 0; i < 152; i++ {
 		// 	fmt.Printf("%2.2x ", ce.anon0[i])

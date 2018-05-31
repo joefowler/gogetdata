@@ -589,6 +589,92 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #48: Entry (mult) check
+	ent, err = d.Entry("mult")
+	if err != nil {
+		t.Error("Could not get Entry for mult type: ", err)
+	} else {
+		if ent.fieldType != MULTIPLYENTRY {
+			t.Errorf("Entry gets field type 0x%x, want MULTIPLY=0x%x", ent.fieldType, MULTIPLYENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := []string{"data", "sbit"}
+		for i := 0; i < 2; i++ {
+			if ent.inFields[i] != expectedf[i] {
+				t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", i, ent.inFields[i], expectedf[i])
+			}
+		}
+	}
+
+	// #48a: Entry (div) check
+	ent, err = d.Entry("div")
+	if err != nil {
+		t.Error("Could not get Entry for div type: ", err)
+	} else {
+		if ent.fieldType != DIVIDEENTRY {
+			t.Errorf("Entry gets field type 0x%x, want DIVIDE=0x%x", ent.fieldType, DIVIDEENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := []string{"mult", "bit"}
+		for i := 0; i < 2; i++ {
+			if ent.inFields[i] != expectedf[i] {
+				t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", i, ent.inFields[i], expectedf[i])
+			}
+		}
+	}
+
+	// #48b: Entry (recip) check
+	ent, err = d.Entry("recip")
+	if err != nil {
+		t.Error("Could not get Entry for recip type: ", err)
+	} else {
+		if ent.fieldType != RECIPENTRY {
+			t.Errorf("Entry gets field type 0x%x, want RECIP=0x%x", ent.fieldType, RECIPENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := []string{"div"}
+		for i := 0; i < 1; i++ {
+			if ent.inFields[i] != expectedf[i] {
+				t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", i, ent.inFields[i], expectedf[i])
+			}
+		}
+		expected := complex(6.5, 4.3)
+		if ent.dividend != real(expected) {
+			t.Errorf("Entry recip gets dividend=%f, want %f", ent.dividend, real(expected))
+		}
+		if ent.cdividend != expected {
+			t.Errorf("Entry recip gets cdividend=%f, want %f", ent.cdividend, expected)
+		}
+	}
+
+	// #49: Entry (phase) check
+	ent, err = d.Entry("phase")
+	if err != nil {
+		t.Error("Could not get Entry for phase type: ", err)
+	} else {
+		if ent.fieldType != PHASEENTRY {
+			t.Errorf("Entry gets field type 0x%x, want PHASE=0x%x", ent.fieldType, PHASEENTRY)
+		}
+		if ent.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", ent.fragment)
+		}
+		expectedf := []string{"data"}
+		for i := 0; i < 1; i++ {
+			if ent.inFields[i] != expectedf[i] {
+				t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", i, ent.inFields[i], expectedf[i])
+			}
+		}
+		if ent.phaseShift != 11 {
+			t.Errorf("Entry recip gets phaseShift=%d, want 11", ent.phaseShift)
+		}
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
