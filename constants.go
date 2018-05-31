@@ -162,5 +162,6 @@ const REGEXUNICODE EntryType = C.GD_REGEX_UNICODE
 
 // LOOKBACKALL searches backwards all the way to the start of a data source.
 const LOOKBACKALL int = -1
+
 // FRAMEHERE indicates the current location of the I/O pointer
 const FRAMEHERE int = C.GD_HERE

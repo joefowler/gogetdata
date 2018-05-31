@@ -439,6 +439,84 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #40: Entry (raw) check
+	ent, err := d.Entry("data")
+	if err != nil {
+		t.Error("Could not get Entry for raw type: ", err)
+	} else {
+		if ent.fieldType != RAWENTRY {
+			t.Errorf("Entry gets field type 0x%x, want RAW=0x%x", ent.fieldType, RAWENTRY)
+		}
+		// TODO: check fragment #
+		if ent.dataType != INT8 {
+			t.Errorf("Entry gets data type 0x%x, want INT8=0x%x", ent.dataType, INT8)
+		}
+		if ent.spf != 8 {
+			t.Errorf("Entry gets spf=%d, want 8", ent.spf)
+		}
+	}
+
+	// #42: Entry (lincom) check
+	ent, err = d.Entry("lincom")
+	if err != nil {
+		t.Error("Could not get Entry for lincom type: ", err)
+	} else {
+		if ent.fieldType != LINCOMENTRY {
+			t.Errorf("Entry gets field type 0x%x, want LINCOM=0x%x", ent.fieldType, LINCOMENTRY)
+		}
+		// TODO: check fragment #
+		if ent.nFields != 3 {
+			t.Errorf("Entry gets nFields=%d, want 3", ent.nFields)
+		}
+		expectedf := []string{"data", "INDEX", "linterp"}
+		expectedm := []complex128{1.1, 2.2, 5.5}
+		expectedb := []complex128{2.2, complex(3.3, 4.4), 5.5}
+		for i := 0; i < ent.nFields; i++ {
+			if ent.inFields[i] != expectedf[i] {
+				t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", i, ent.inFields[i], expectedf[i])
+			}
+			if ent.m[i] != real(expectedm[i]) {
+				t.Errorf("Entry gets m[%d]=%f, want %f", i, ent.m[i], expectedm[i])
+			}
+			if ent.cm[i] != expectedm[i] {
+				t.Errorf("Entry gets cm[%d]=%f, want %f", i, ent.cm[i], expectedm[i])
+			}
+			if ent.b[i] != real(expectedb[i]) {
+				t.Errorf("Entry gets b[%d]=%f, want %f", i, ent.b[i], expectedb[i])
+			}
+			if ent.cb[i] != expectedb[i] {
+				t.Errorf("Entry gets cb[%d]=%f, want %f", i, ent.cb[i], expectedb[i])
+			}
+		}
+	}
+
+	// #44: Entry (polynom) check
+	ent, err = d.Entry("polynom")
+	if err != nil {
+		t.Error("Could not get Entry for polynom type: ", err)
+	} else {
+		if ent.fieldType != POLYNOMENTRY {
+			t.Errorf("Entry gets field type 0x%x, want POLYNOM=0x%x", ent.fieldType, POLYNOMENTRY)
+		}
+		// TODO: check fragment #
+		if ent.polyOrder != 5 {
+			t.Errorf("Entry gets polyOrder=%d, want 5", ent.polyOrder)
+		}
+		expectedf := "data"
+		expecteda := []complex128{1.1, 2.2, 2.2, complex(3.3, 4.4), 5.5, 5.5}
+		if ent.inFields[0] != expectedf {
+			t.Errorf("Entry gets inFields[%d]=\"%s\", want \"%s\"", 0, ent.inFields[0], expectedf)
+		}
+		for i := 0; i < ent.polyOrder; i++ {
+			if ent.a[i] != real(expecteda[i]) {
+				t.Errorf("Entry gets a[%d]=%f, want %f", i, ent.a[i], expecteda[i])
+			}
+			if ent.ca[i] != expecteda[i] {
+				t.Errorf("Entry gets ca[%d]=%f, want %f", i, ent.ca[i], expecteda[i])
+			}
+		}
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
@@ -800,19 +878,19 @@ func TestRead(t *testing.T) {
 	}
 
 	// #199: Strings test
-	s199, err := d.Strings()
-	if err != nil {
-		t.Error("Strings() failed: ", err)
-	} else {
-		// expected := []string{"Lorem ipsum", "", "Arthur Dent"}
-		// TODO: use the above
-		expected := []string{"Arthur Dent"}
-		for i := 0; i < len(expected); i++ {
-			if s199[i] != expected[i] {
-				t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
-			}
-		}
-	}
+	// s199, err := d.Strings()
+	// if err != nil {
+	// 	t.Error("Strings() failed: ", err)
+	// } else {
+	// 	// expected := []string{"Lorem ipsum", "", "Arthur Dent"}
+	// 	// TODO: use the above
+	// 	expected := []string{"Arthur Dent"}
+	// 	for i := 0; i < len(expected); i++ {
+	// 		if s199[i] != expected[i] {
+	// 			t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
+	// 		}
+	// 	}
+	// }
 
 	// #208: Sync check
 	err = d.Sync("data")

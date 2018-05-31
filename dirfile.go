@@ -435,6 +435,17 @@ func (df Dirfile) ArrayLen(fieldcode string) int {
 	return int(C.gd_array_len(df.d, fcode))
 }
 
+func (df Dirfile) Entry(fieldcode string) (Entry, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	var ce C.gd_entry_t
+	result := int(C.gd_entry(df.d, fcode, &ce))
+	if result != 0 {
+		return Entry{}, df.Error()
+	}
+	return entryFromC(&ce), nil
+}
+
 // NEntries returns the number of fields in the dirfile satisfying various criteria.
 func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint {
 	cparent := C.CString(parent)
