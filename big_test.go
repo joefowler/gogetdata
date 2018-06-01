@@ -1096,8 +1096,20 @@ func TestRead(t *testing.T) {
 			t.Errorf("Entry new12 gets field type 0x%x, want STRING=0x%x", e82.fieldType, STRINGENTRY)
 		}
 		if e82.fragment != 0 {
-			t.Errorf("Entry new21 gets fragment index=%d, want 0", e82.fragment)
+			t.Errorf("Entry new12 gets fragment index=%d, want 0", e82.fragment)
 		}
+	}
+
+	// #84: AddSpec check
+	err = d.AddSpec("lorem STRING \"Lorem ipsum\"", 0)
+	if err != nil {
+		t.Error("AddSpec error in test 84: ", err)
+	}
+	s84, err := d.GetString("lorem")
+	if err != nil {
+		t.Error("GetString error in test 84: ", err)
+	} else if s84 != "Lorem ipsum" {
+		t.Errorf("GetString in test 84 returned \"%s\", want \"Lorem ipsum\"", s84)
 	}
 
 	// #86: PutConstant int32 check
@@ -1467,19 +1479,17 @@ func TestRead(t *testing.T) {
 	}
 
 	// #199: Strings test
-	// s199, err := d.Strings()
-	// if err != nil {
-	// 	t.Error("Strings() failed: ", err)
-	// } else {
-	// 	// expected := []string{"Lorem ipsum", "", "Arthur Dent"}
-	// 	// TODO: use the above
-	// 	expected := []string{"Arthur Dent"}
-	// 	for i := 0; i < len(expected); i++ {
-	// 		if s199[i] != expected[i] {
-	// 			t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
-	// 		}
-	// 	}
-	// }
+	s199, err := d.Strings()
+	if err != nil {
+		t.Error("Strings() failed: ", err)
+	} else {
+		expected := []string{"Lorem ipsum", "glob", "Arthur Dent"}
+		for i := 0; i < len(expected); i++ {
+			if s199[i] != expected[i] {
+				t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
+			}
+		}
+	}
 
 	// #208: Sync check
 	err = d.Sync("data")

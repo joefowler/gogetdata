@@ -328,19 +328,22 @@ func (df Dirfile) GetString(fieldcode string) (string, error) {
 
 // Strings returns the value of all STRING fields (including metafields)
 func (df Dirfile) Strings() ([]string, error) {
-	cptr := C.gd_strings(df.d)
+	cptr := (**C.char)(C.gd_strings(df.d))
 	if cptr == (**C.char)(C.NULL) {
 		return nil, fmt.Errorf("Dirfile.Strings returned NULL")
 	}
+
 	var result []string
 	listend := (*C.char)(C.NULL)
-	cstr0 := *(**C.char)(cptr)
-	for cstr0 != listend {
+	cstr0 := *cptr
+	INSANE := 10000
+	for i := 0; i < INSANE; i++ {
 		result = append(result, C.GoString(cstr0))
-		// fmt.Printf("cptr=%p, cstr0=%p, result=%s ", cptr, cstr0, result)
-		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(&cstr0)) + unsafe.Sizeof(cstr0)))
-		cstr0 = *(**C.char)(cptr)
-		// fmt.Printf("new cptr=%p, cstr0=%p\n", cptr, cstr0)
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *cptr
+		if cstr0 == listend {
+			return result, nil
+		}
 	}
 	return result, nil
 }
