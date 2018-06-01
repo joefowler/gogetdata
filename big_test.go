@@ -712,6 +712,210 @@ func TestRead(t *testing.T) {
 		t.Errorf("FragmentIndex returns %d, want 0", n52)
 	}
 
+	// #53: RawEntry check
+	e53 := RawEntry("new1", 0, 3, FLOAT64)
+	err = d.AddEntry(&e53)
+	if err != nil {
+		t.Error("Could not AddEntry in test 53:", err)
+	}
+	e53b, err := d.Entry("new1")
+	if err != nil {
+		t.Error("Could not read Entry in test 53:", err)
+	} else {
+		if e53b.fieldType != RAWENTRY {
+			t.Errorf("Entry gets field type 0x%x, want RAW=0x%x", e53b.fieldType, RAWENTRY)
+		}
+		if e53b.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", e53b.fragment)
+		}
+		if e53b.dataType != FLOAT64 {
+			t.Errorf("Entry gets data type 0x%x, want FLOAT64=0x%x", e53b.dataType, FLOAT64)
+		}
+		if e53b.spf != 3 {
+			t.Errorf("Entry gets spf=%d, want 3", e53b.spf)
+		}
+	}
+
+	// #54: Lincom check
+	in54 := []string{"in1", "in2"}
+	m54 := []float64{9.9, 7.7}
+	b54 := []float64{8.8, 6.6}
+	err = d.AddLincom("new2", in54, m54, b54, 0)
+	if err != nil {
+		t.Error("Could not AddLincom in test 54:", err)
+	}
+	e54, err := d.Entry("new2")
+	if err != nil {
+		t.Error("Could not read Entry new2 in test 54:", err)
+	} else {
+		if e54.fieldType != LINCOMENTRY {
+			t.Errorf("Entry new2 gets field type 0x%x, want LINCOM=0x%x", e54.fieldType, LINCOMENTRY)
+		}
+		if e54.fragment != 0 {
+			t.Errorf("Entry new2 gets fragment index=%d, want 0", e54.fragment)
+		}
+		if e54.nFields != 2 {
+			t.Errorf("Entry new2 gets %d fields, want 2", e54.nFields)
+		}
+		for i := 0; i < len(in54); i++ {
+			if e54.inFields[i] != in54[i] {
+				t.Errorf("Entry new2 inFields[%d]=%s, want %s", i, e54.inFields[i], in54[i])
+			}
+			if e54.m[i] != m54[i] {
+				t.Errorf("Entry new2 m[%d]=%f, want %f", i, e54.m[i], m54[i])
+			}
+			if e54.b[i] != b54[i] {
+				t.Errorf("Entry new2 b[%d]=%f, want %f", i, e54.b[i], b54[i])
+			}
+		}
+	}
+
+	// #55: CLincom (complex) check
+	in55 := []string{"in1", "in2"}
+	var m55 [2]complex128
+	m55[0] = complex(1.1, 1.2)
+	m55[1] = complex(1.4, 1.5)
+	var b55 [2]complex128
+	b55[0] = complex(1.3, 1.4)
+	b55[1] = complex(1.6, 1.7)
+	err = d.AddCLincom("new3", in55, m55, b55, 0)
+	if err != nil {
+		t.Error("Could not AddCLincom in test 55:", err)
+	}
+	e55, err := d.Entry("new3")
+	if err != nil {
+		t.Error("Could not read Entry new3 in test 55:", err)
+	} else {
+		if e55.fieldType != LINCOMENTRY {
+			t.Errorf("Entry new3 gets field type 0x%x, want LINCOM=0x%x", e55.fieldType, LINCOMENTRY)
+		}
+		if e55.fragment != 0 {
+			t.Errorf("Entry new3 gets fragment index=%d, want 0", e55.fragment)
+		}
+		if e55.nFields != 2 {
+			t.Errorf("Entry new3 gets %d fields, want 2", e55.nFields)
+		}
+		for i := 0; i < len(in55); i++ {
+			if e55.inFields[i] != in55[i] {
+				t.Errorf("Entry new3 inFields[%d]=%s, want %s", i, e55.inFields[i], in55[i])
+			}
+			if e55.m[i] != m55[i] {
+				t.Errorf("Entry new3 m[%d]=%f, want %f", i, e55.m[i], m55[i])
+			}
+			if e55.b[i] != b55[i] {
+				t.Errorf("Entry new3 b[%d]=%f, want %f", i, e55.b[i], b55[i])
+			}
+		}
+	}
+
+	// #56: Polynom check
+	in56 := "in1"
+	a56 := []float64{3.9, 4.8, 5.7, 6.6}
+	err = d.AddPolynom("new4", in56, a56, 0)
+	if err != nil {
+		t.Error("Could not AddPolynom in test 56:", err)
+	}
+	e56, err := d.Entry("new4")
+	if err != nil {
+		t.Error("Could not read Entry new4 in test 56:", err)
+	} else {
+		if e56.fieldType != POLYNOMENTRY {
+			t.Errorf("Entry new4 gets field type 0x%x, want POLYNOM=0x%x", e56.fieldType, POLYNOMENTRY)
+		}
+		if e56.fragment != 0 {
+			t.Errorf("Entry new4 gets fragment index=%d, want 0", e56.fragment)
+		}
+		if e56.polyOrder != len(a56)-1 {
+			t.Errorf("Entry new4 has polyOrder=%d, want %d", e56.polyOrder, len(a56)-1)
+		}
+		if e56.inFields[0] != in56 {
+			t.Errorf("Entry new4 inFields[0]=%s, want %s", e56.inFields[0], in56)
+		}
+		for i := 0; i < len(a56); i++ {
+			if e56.a[i] != a56[i] {
+				t.Errorf("Entry new4 a[%d]=%f, want %f", i, e56.a[i], a56[i])
+			}
+		}
+	}
+
+	// #58: Linterp check
+	in58 := "in1"
+	t58 := "./some/table"
+	err = d.AddLinterp("new6", in58, t58, 0)
+	if err != nil {
+		t.Error("Could not AddLinterp in test 58:", err)
+	}
+	e58, err := d.Entry("new6")
+	if err != nil {
+		t.Error("Could not read Entry new6 in test 58:", err)
+	} else {
+		if e58.fieldType != LINTERPENTRY {
+			t.Errorf("Entry new6 gets field type 0x%x, want LINTERP=0x%x", e58.fieldType, LINTERPENTRY)
+		}
+		if e58.fragment != 0 {
+			t.Errorf("Entry new6 gets fragment index=%d, want 0", e58.fragment)
+		}
+		if e58.inFields[0] != in58 {
+			t.Errorf("Entry new6 inFields[0]=%s, want %s", e58.inFields[0], in58)
+		}
+		if e58.table != t58 {
+			t.Errorf("Entry new6 table=%s, want %s", e58.table, t58)
+		}
+	}
+
+	// #59: BitEntry check
+	e59 := BitEntry("new7", "in", 13, 12, 0)
+	err = d.AddEntry(&e59)
+	if err != nil {
+		t.Error("Could not AddEntry in test 59:", err)
+	}
+	e59b, err := d.Entry("new7")
+	if err != nil {
+		t.Error("Could not read Entry in test 59:", err)
+	} else {
+		if e59b.fieldType != BITENTRY {
+			t.Errorf("Entry gets field type 0x%x, want BIT=0x%x", e59b.fieldType, BITENTRY)
+		}
+		if e59b.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", e59b.fragment)
+		}
+		if e59b.inFields[0] != "in" {
+			t.Errorf("Entry in_fields[0]=%s, want %s", e59b.inFields[0], "in")
+		}
+		if e59b.bitnum != 13 {
+			t.Errorf("Entry gets bitnum=%d, want 13", e59b.bitnum)
+		}
+		if e59b.numbits != 12 {
+			t.Errorf("Entry gets numbits=%d, want 12", e59b.numbits)
+		}
+	}
+
+	// #60: SBit Entry check
+	err = d.AddSbit("new8", "in2", 14, 15, 0)
+	if err != nil {
+		t.Error("Could not AddEntry in test 60:", err)
+	}
+	e60, err := d.Entry("new8")
+	if err != nil {
+		t.Error("Could not read Entry in test 60:", err)
+	} else {
+		if e60.fieldType != SBITENTRY {
+			t.Errorf("Entry gets field type 0x%x, want SBIT=0x%x", e60.fieldType, SBITENTRY)
+		}
+		if e60.fragment != 0 {
+			t.Errorf("Entry gets fragment index=%d, want 0", e60.fragment)
+		}
+		if e60.inFields[0] != "in2" {
+			t.Errorf("Entry in_fields[0]=%s, want %s", e60.inFields[0], "in")
+		}
+		if e60.bitnum != 14 {
+			t.Errorf("Entry gets bitnum=%d, want 14", e60.bitnum)
+		}
+		if e60.numbits != 15 {
+			t.Errorf("Entry gets numbits=%d, want 15", e60.numbits)
+		}
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
@@ -752,7 +956,7 @@ func TestRead(t *testing.T) {
 
 	// #69: NVectors check
 	nvec := d.NVectors()
-	if nvec != 15 { // TODO: update to 25 when we've added vectors in earlier tests
+	if nvec != 20 { // TODO: update to 25 when we've added vectors in earlier tests
 		t.Errorf("NVectors = %d, want 20", nvec)
 	}
 
@@ -761,13 +965,9 @@ func TestRead(t *testing.T) {
 	if len(vectors) != int(nvec) {
 		t.Errorf("VectorList length is %d, want %d", len(vectors), nvec)
 	} else {
-		// truevnames := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
-		// 	"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
-		// 	"alias", "indir", "mplex", "new10", "phase", "recip", "lincom",
-		// 	"window", "linterp", "polynom"}
-		// TODO: fix when all tests are in place. Above is the true answer.
-		truevnames := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
-			"alias", "indir", "mplex", "phase", "recip", "lincom",
+		truevnames := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
+			"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
+			"alias", "indir", "mplex", "new10", "phase", "recip", "lincom",
 			"window", "linterp", "polynom"}
 		for i := 0; i < int(nvec); i++ {
 			if vectors[i] != truevnames[i] {

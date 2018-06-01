@@ -64,6 +64,18 @@ type Entry struct {
 	e         *C.gd_entry_t
 }
 
+// func entryToC(e *Entry) *C.gd_entry_t {
+// 	cp := (*C.gd_entry_t)(C.malloc(C.sizeof_gd_entry_t))
+// 	ce := *cp
+// 	ce.field = C.CString(e.name)
+// 	ce.field_type = C.gd_entype_t(e.fieldType)
+// 	ce.flags = C.uint(e.flags)
+// 	for i := 0; i < MAXLINCOM; i++ {
+// 		ce.in_fields[i] = C.CString(e.inFields[i])
+// 	}
+// 	return cp
+// }
+//
 func entryFromC(ce *C.gd_entry_t) Entry {
 	e := Entry{
 		name:      C.GoString(ce.field),
@@ -141,5 +153,30 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		// 	}
 		// }
 	}
+	return e
+}
+
+// RawEntry creates an Entry of RAW type without adding to any Dirfile
+func RawEntry(name string, fragmentIndex int, samplesPerFrame uint, dType RetType) Entry {
+	var e = Entry{
+		name:      name,
+		fieldType: RAWENTRY,
+		fragment:  fragmentIndex,
+	}
+	e.spf = samplesPerFrame
+	e.dataType = dType
+	return e
+}
+
+// BitEntry creates an Entry of BIT type without adding to any Dirfile
+func BitEntry(name, inField string, bitnum, numbits, fragmentIndex int) Entry {
+	var e = Entry{
+		name:      name,
+		fieldType: BITENTRY,
+		fragment:  fragmentIndex,
+	}
+	e.inFields[0] = inField
+	e.numbits = numbits
+	e.bitnum = bitnum
 	return e
 }

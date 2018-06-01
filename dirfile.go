@@ -435,6 +435,7 @@ func (df Dirfile) ArrayLen(fieldcode string) int {
 	return int(C.gd_array_len(df.d, fcode))
 }
 
+// Entry returns the dirfile entry with the given name
 func (df Dirfile) Entry(fieldcode string) (Entry, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -638,6 +639,137 @@ func (df *Dirfile) Uninclude(index int, del bool) error {
 	}
 	result := int(C.gd_uninclude(df.d, C.int(index), cdel))
 	if result != C.GD_E_OK {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddEntry adds a field to a dirfile.
+// Avoid calling the C.gd_add() function, because it would require constructing
+// a *C.gd_entry_t from our go data.
+func (df *Dirfile) AddEntry(e *Entry) error {
+	switch e.fieldType {
+	case RAWENTRY:
+		return df.AddRaw(e.name, e.dataType, e.spf, e.fragment)
+	case BITENTRY:
+		return df.AddBit(e.name, e.inFields[0], e.bitnum, e.numbits, e.fragment)
+	}
+	return fmt.Errorf("Unknown or not implemented entry type 0x%x", e.fieldType)
+}
+
+// AddRaw adds a RAW field to the dirfile
+func (df *Dirfile) AddRaw(fieldname string, dataType RetType, spf uint, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_add_raw(df.d, fcode, C.gd_type_t(dataType), C.uint(spf), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddSpec adds a field specification line to the dirfile
+func (df *Dirfile) AddSpec(line string, fragIndex int) error {
+	specline := C.CString(line)
+	defer C.free(unsafe.Pointer(specline))
+	result := C.gd_add_spec(df.d, specline, C.int(fragIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddBit adds a BIT field to the dirfile
+func (df *Dirfile) AddBit(fieldname, inField string, bitnum, numbits, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+	result := C.gd_add_bit(df.d, fcode, ifield, C.int(bitnum), C.int(numbits), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddCarray adds a CARRAY field to the dirfile
+func (df *Dirfile) AddCarray(fieldname string, constType RetType, data interface{},
+	fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	dataType, pvalues, nData := array2type(data)
+	result := C.gd_add_carray(df.d, fcode, C.gd_type_t(constType), C.size_t(nData),
+		C.gd_type_t(dataType), pvalues, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddLincom adds a LINCOM field to the dirfile
+func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64,
+	fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	nfields := len(inFields)
+	if nfields != len(m) || nfields != len(b) {
+		return fmt.Errorf("AddCLincom needs inFields, m, and b to be of equal length")
+	}
+	cpointers := make([]uintptr, nfields)
+	for i, infield := range inFields {
+		cstr := C.CString(infield)
+		defer C.free(unsafe.Pointer(cstr))
+		cpointers[i] = uintptr(unsafe.Pointer(cstr))
+	}
+	result := C.gd_add_lincom(df.d, fcode, C.int(nfields), (**C.char)(unsafe.Pointer(&cpointers[0])),
+		(*C.double)(unsafe.Pointer(&m[0])),
+		(*C.double)(unsafe.Pointer(&b[0])), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddLinterp adds a LINTERP field to the dirfile
+func (df *Dirfile) AddLinterp(fieldname, inField, table string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield := C.CString(inField)
+	defer C.free(unsafe.Pointer(cfield))
+	ctable := C.CString(table)
+	defer C.free(unsafe.Pointer(ctable))
+	result := C.gd_add_linterp(df.d, fcode, cfield, ctable, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddPolynom adds a Polynom field to the dirfile
+func (df *Dirfile) AddPolynom(fieldname, inField string, a []float64, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+
+	ncoef := len(a)
+	polyOrder := ncoef - 1
+	result := C.gd_add_polynom(df.d, fcode, C.int(polyOrder), ifield, (*C.double)(unsafe.Pointer(&a[0])),
+		C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddSbit adds a SBIT field to the dirfile
+func (df *Dirfile) AddSbit(fieldname, inField string, bitnum, numbits, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+	result := C.gd_add_sbit(df.d, fcode, ifield, C.int(bitnum), C.int(numbits), C.int(fragmentIndex))
+	if result < 0 {
 		return df.Error()
 	}
 	return nil
