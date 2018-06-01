@@ -171,9 +171,10 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 	case WINDOWENTRY:
 		e.windOp = WindowOps(*(*C.gd_windop_t)(unsafe.Pointer(base)))
 		base += unsafe.Sizeof(C.gd_windop_t(0))
-		e.iThreshold = int64(*(*C.int64_t)(unsafe.Pointer(base)))
-		e.uThreshold = uint64(*(*C.uint64_t)(unsafe.Pointer(base)))
-		e.fThreshold = float64(*(*C.double_t)(unsafe.Pointer(base)))
+		// Handle the 3-way union called gd_triplet_t
+		e.iThreshold = int64(*(*int64)(unsafe.Pointer(base)))
+		e.uThreshold = uint64(*(*uint64)(unsafe.Pointer(base)))
+		e.fThreshold = float64(*(*float64)(unsafe.Pointer(base)))
 
 		// for i := 0; i < 19; i++ {
 		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
