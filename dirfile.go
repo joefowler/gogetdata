@@ -757,7 +757,6 @@ func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64
 	defer C.free(unsafe.Pointer(fcode))
 	nfields := len(inFields)
 	if nfields != len(m) || nfields != len(b) {
-		fmt.Printf("Yikes! lengths %d %d %d\n", nfields, len(m), len(b))
 		return fmt.Errorf("AddLincom needs inFields, m, and b to be of equal length")
 	}
 	cpointers := make([]uintptr, nfields)
@@ -919,6 +918,25 @@ func (df *Dirfile) AddCRecip(fieldname, inField string, dividend complex128, fra
 	return nil
 }
 
+// AddSarray adds a SARRAY field to the dirfile
+func (df *Dirfile) AddSarray(fieldname string, inFields []string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	nfields := len(inFields)
+	cpointers := make([]uintptr, nfields)
+	for i, infield := range inFields {
+		cstr := C.CString(infield)
+		defer C.free(unsafe.Pointer(cstr))
+		cpointers[i] = uintptr(unsafe.Pointer(cstr))
+	}
+	result := C.gd_add_sarray(df.d, fcode, C.size_t(nfields), (**C.char)(unsafe.Pointer(&cpointers[0])),
+		C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddSbit adds a SBIT field to the dirfile
 func (df *Dirfile) AddSbit(fieldname, inField string, bitnum, numbits, fragmentIndex int) error {
 	fcode := C.CString(fieldname)
@@ -947,6 +965,20 @@ func (df *Dirfile) AddSindir(fieldname, indexField, carrayField string, fragment
 	return nil
 }
 
+// AddString adds a STRING field to the dirfile
+func (df *Dirfile) AddString(fieldname, value string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cvalue))
+	result := C.gd_add_string(df.d, fcode, cvalue, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// Delete deletes an entry from the Dirfile
 func (df *Dirfile) Delete(fieldname string, flags DeleteFlags) error {
 	fcode := C.CString(fieldname)
 	defer C.free(unsafe.Pointer(fcode))

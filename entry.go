@@ -65,9 +65,11 @@ type Entry struct {
 	bits
 	phaseShift int64
 	reciprocal
-	constType RetType
+
 	mplex
-	e *C.gd_entry_t
+	constType RetType
+	arrayLen  int
+	e         *C.gd_entry_t
 }
 
 // func entryToC(e *Entry) *C.gd_entry_t {
@@ -150,15 +152,17 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		e.phaseShift = int64(*(*C.gd_int64_t)(unsafe.Pointer(base)))
 
 	case MPLEXENTRY:
-		// for i := 0; i < 19; i++ {
-		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
-		// }
 		e.countVal = int(*(*C.int)(unsafe.Pointer(base)))
 		base += unsafe.Sizeof(C.int(0))
 		e.period = int(*(*C.int)(unsafe.Pointer(base)))
 
-	case CONSTENTRY:
+	case CONSTENTRY, SARRAYENTRY:
+		// for i := 0; i < 19; i++ {
+		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
+		// }
 		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.long(0))
+		e.arrayLen = int(*(*C.size_t)(unsafe.Pointer(base)))
 
 	}
 	return e

@@ -1076,10 +1076,27 @@ func TestRead(t *testing.T) {
 	// #81: GetString check
 	st, err := d.GetString("string")
 	if err != nil {
-		t.Error("GetString error in test 86: ", err)
+		t.Error("GetString error in test 81: ", err)
 	} else {
 		if st != "Zaphod Beeblebrox" {
 			t.Errorf("GetString returned \"%s\", want \"Zaphod Beeblebrox\"", st)
+		}
+	}
+
+	// #82: AddString check
+	err = d.AddString("new12", "glob", 0)
+	if err != nil {
+		t.Error("AddString error in test 82: ", err)
+	}
+	e82, err := d.Entry("new12")
+	if err != nil {
+		t.Error("Entry error in test 82: ", err)
+	} else {
+		if e82.fieldType != STRINGENTRY {
+			t.Errorf("Entry new12 gets field type 0x%x, want STRING=0x%x", e82.fieldType, STRINGENTRY)
+		}
+		if e82.fragment != 0 {
+			t.Errorf("Entry new21 gets fragment index=%d, want 0", e82.fragment)
 		}
 	}
 
@@ -1570,8 +1587,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
 	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 25 { // TODO: eventually 27
-		t.Errorf("d.NEntries counts %d VECTOR entries, want 24", ne)
+	if ne != 27 {
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 27", ne)
 	}
 
 	// #239: EntryList check
@@ -1592,6 +1609,27 @@ func TestRead(t *testing.T) {
 
 	// #240: MplexLookback test (returns nothing, so simply call it)
 	d.MplexLookback(LOOKBACKALL)
+
+	// #283: Sarray check
+	in283 := []string{"str1", "str2", "str4", "str8"}
+	err = d.AddSarray("new283", in283, 0)
+	if err != nil {
+		t.Error("Could not AddSarray in test 283:", err)
+	}
+	e283, err := d.Entry("new283")
+	if err != nil {
+		t.Error("Could not read Entry new283 in test 283:", err)
+	} else {
+		if e283.fieldType != SARRAYENTRY {
+			t.Errorf("Entry new283 gets field type 0x%x, want SARRAY=0x%x", e283.fieldType, SARRAYENTRY)
+		}
+		if e283.fragment != 0 {
+			t.Errorf("Entry new283 gets fragment index=%d, want 0", e283.fragment)
+		}
+		if e283.arrayLen != len(in283) {
+			t.Errorf("Entry new283 gets %d fields, want %d", e283.nFields, len(in283))
+		}
+	}
 
 	// #289: Indir check
 	in289 := []string{"in1", "in2"}

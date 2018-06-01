@@ -117,6 +117,9 @@ const RAWENTRY EntryType = C.GD_RAW_ENTRY
 // RECIPENTRY denotes the reciprocal of an input field
 const RECIPENTRY EntryType = C.GD_RECIP_ENTRY
 
+// SARRAYENTRY denotes array of strings fully specified in the format file metadata
+const SARRAYENTRY EntryType = C.GD_SARRAY_ENTRY
+
 // SBITENTRY denotes one or more bits out of an input vector field, treating the result as signed
 const SBITENTRY EntryType = C.GD_SBIT_ENTRY
 
