@@ -835,6 +835,36 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #57: CPolynom check
+	in57 := "in3"
+	a57 := []complex128{complex(3.1, 9), complex(4.2, 8), complex(5.2, 9), complex(6.3, 4.4)}
+	err = d.AddCPolynom("new5", in57, a57, 0)
+	if err != nil {
+		t.Error("Could not AddCPolynom in test 57:", err)
+	}
+	e57, err := d.Entry("new5")
+	if err != nil {
+		t.Error("Could not read Entry new5 in test 57:", err)
+	} else {
+		if e57.fieldType != POLYNOMENTRY {
+			t.Errorf("Entry new5 gets field type 0x%x, want POLYNOM=0x%x", e57.fieldType, POLYNOMENTRY)
+		}
+		if e57.fragment != 0 {
+			t.Errorf("Entry new5 gets fragment index=%d, want 0", e57.fragment)
+		}
+		if e57.polyOrder != len(a57)-1 {
+			t.Errorf("Entry new5 has polyOrder=%d, want %d", e57.polyOrder, len(a57)-1)
+		}
+		if e57.inFields[0] != in57 {
+			t.Errorf("Entry new5 inFields[0]=%s, want %s", e57.inFields[0], in57)
+		}
+		for i := 0; i < len(a57); i++ {
+			if e57.ca[i] != a57[i] {
+				t.Errorf("Entry new5 ca[%d]=%f, want %f", i, e57.ca[i], a57[i])
+			}
+		}
+	}
+
 	// #58: Linterp check
 	in58 := "in1"
 	t58 := "./some/table"

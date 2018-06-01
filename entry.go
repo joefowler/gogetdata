@@ -1,7 +1,7 @@
 package getdata
 
 /*
-#cgo CFLAGS: -I/usr/local/include -std=c99
+#cgo CFLAGS: -I/usr/local/include -DGD_C89_API
 #cgo LDFLAGS: -L/usr/local/lib -lgetdata
 #include <getdata.h>
 #include <stdlib.h>
@@ -75,7 +75,7 @@ type Entry struct {
 // 	}
 // 	return cp
 // }
-//
+
 func entryFromC(ce *C.gd_entry_t) Entry {
 	e := Entry{
 		name:      C.GoString(ce.field),
@@ -87,7 +87,7 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		e.inFields[i] = C.GoString(ce.in_fields[i])
 	}
 
-	base := uintptr(unsafe.Pointer(&ce.anon0[0]))
+	base := uintptr(unsafe.Pointer(&ce.flags)) + unsafe.Sizeof(ce.flags)
 	switch e.fieldType {
 	case RAWENTRY:
 		e.spf = uint(*(*C.uint)(unsafe.Pointer(base)))
@@ -146,11 +146,8 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 	case CONSTENTRY:
 		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
 
-		// for i := 0; i < 152; i++ {
-		// 	fmt.Printf("%2.2x ", ce.anon0[i])
-		// 	if i%8 == 7 {
-		// 		fmt.Println()
-		// 	}
+		// for i := 0; i < 19; i++ {
+		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
 		// }
 	}
 	return e

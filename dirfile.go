@@ -1,7 +1,7 @@
 package getdata
 
 /*
-#cgo CFLAGS: -I/usr/local/include
+#cgo CFLAGS: -I/usr/local/include -std=c89 -DGD_C89_API
 #cgo LDFLAGS: -L/usr/local/lib -lgetdata
 #include <getdata.h>
 #include <stdlib.h>
@@ -746,8 +746,8 @@ func (df *Dirfile) AddCLincom(fieldname string, inFields []string, m, b []comple
 		cpointers[i] = uintptr(unsafe.Pointer(cstr))
 	}
 	result := C.gd_add_clincom(df.d, fcode, C.int(nfields), (**C.char)(unsafe.Pointer(&cpointers[0])),
-		(*C.complexdouble)(unsafe.Pointer(&m[0])),
-		(*C.complexdouble)(unsafe.Pointer(&b[0])), C.int(fragmentIndex))
+		(*C.double)(unsafe.Pointer(&m[0])),
+		(*C.double)(unsafe.Pointer(&b[0])), C.int(fragmentIndex))
 	if result < 0 {
 		return df.Error()
 	}
