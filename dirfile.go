@@ -720,6 +720,36 @@ func (df *Dirfile) AddConst(fieldname string, constType RetType, data interface{
 	return nil
 }
 
+// AddDivide adds a DIVIDE field to the dirfile
+func (df *Dirfile) AddDivide(fieldname, inField1, inField2 string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield1 := C.CString(inField1)
+	defer C.free(unsafe.Pointer(cfield1))
+	cfield2 := C.CString(inField2)
+	defer C.free(unsafe.Pointer(cfield2))
+	result := C.gd_add_divide(df.d, fcode, cfield1, cfield2, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddIndir adds a INDIR field to the dirfile
+func (df *Dirfile) AddIndir(fieldname, indexField, carrayField string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield1 := C.CString(indexField)
+	defer C.free(unsafe.Pointer(cfield1))
+	cfield2 := C.CString(carrayField)
+	defer C.free(unsafe.Pointer(cfield2))
+	result := C.gd_add_indir(df.d, fcode, cfield1, cfield2, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddLincom adds a LINCOM field to the dirfile
 func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64,
 	fragmentIndex int) error {
@@ -778,6 +808,23 @@ func (df *Dirfile) AddLinterp(fieldname, inField, table string, fragmentIndex in
 	ctable := C.CString(table)
 	defer C.free(unsafe.Pointer(ctable))
 	result := C.gd_add_linterp(df.d, fcode, cfield, ctable, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddMplex adds a MPLEX field to the dirfile
+func (df *Dirfile) AddMplex(fieldname, inField, countField string,
+	countVal, period int, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield := C.CString(inField)
+	defer C.free(unsafe.Pointer(cfield))
+	ctable := C.CString(countField)
+	defer C.free(unsafe.Pointer(ctable))
+	result := C.gd_add_mplex(df.d, fcode, cfield, ctable, C.int(countVal), C.int(period),
+		C.int(fragmentIndex))
 	if result < 0 {
 		return df.Error()
 	}
@@ -853,6 +900,21 @@ func (df *Dirfile) AddSbit(fieldname, inField string, bitnum, numbits, fragmentI
 	ifield := C.CString(inField)
 	defer C.free(unsafe.Pointer(ifield))
 	result := C.gd_add_sbit(df.d, fcode, ifield, C.int(bitnum), C.int(numbits), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddSindir adds a SINDIR field to the dirfile
+func (df *Dirfile) AddSindir(fieldname, indexField, carrayField string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield1 := C.CString(indexField)
+	defer C.free(unsafe.Pointer(cfield1))
+	cfield2 := C.CString(carrayField)
+	defer C.free(unsafe.Pointer(cfield2))
+	result := C.gd_add_sindir(df.d, fcode, cfield1, cfield2, C.int(fragmentIndex))
 	if result < 0 {
 		return df.Error()
 	}

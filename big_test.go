@@ -1256,6 +1256,29 @@ func TestRead(t *testing.T) {
 
 	// #138: PutData (auto) check duplicates #37, so skip it.
 
+	// #146: Divide check
+	in146 := []string{"in1", "in2"}
+	err = d.AddDivide("new14", in146[0], in146[1], 0)
+	if err != nil {
+		t.Error("Could not AddDivide in test 146:", err)
+	}
+	e146, err := d.Entry("new14")
+	if err != nil {
+		t.Error("Could not read Entry new14 in test 146:", err)
+	} else {
+		if e146.fieldType != DIVIDEENTRY {
+			t.Errorf("Entry new14 gets field type 0x%x, want DIVIDE=0x%x", e146.fieldType, DIVIDEENTRY)
+		}
+		if e146.fragment != 0 {
+			t.Errorf("Entry new14 gets fragment index=%d, want 0", e146.fragment)
+		}
+		for i := 0; i < len(in146); i++ {
+			if e146.inFields[i] != in146[i] {
+				t.Errorf("Entry new14 inFields[%d]=%s, want %s", i, e146.inFields[i], in146[i])
+			}
+		}
+	}
+
 	// #155: Fragment.Rewrite check
 	err = frag.Rewrite()
 	if err != nil {
@@ -1418,6 +1441,35 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not call MetaFlush")
 	}
 
+	// #229: AddMplex check
+	in229 := []string{"in1", "in2"}
+	err = d.AddMplex("new21", in229[0], in229[1], 5, 6, 0)
+	if err != nil {
+		t.Error("Could not AddMplex in test 229:", err)
+	}
+	e229, err := d.Entry("new21")
+	if err != nil {
+		t.Error("Could not read Entry new21 in test 229:", err)
+	} else {
+		if e229.fieldType != MPLEXENTRY {
+			t.Errorf("Entry new21 gets field type 0x%x, want MPLEX=0x%x", e229.fieldType, MPLEXENTRY)
+		}
+		if e229.fragment != 0 {
+			t.Errorf("Entry new21 gets fragment index=%d, want 0", e229.fragment)
+		}
+		for i := 0; i < len(in229); i++ {
+			if e229.inFields[i] != in229[i] {
+				t.Errorf("Entry new21 inFields[%d]=%s, want %s", i, e229.inFields[i], in229[i])
+			}
+		}
+		if e229.countVal != 5 {
+			t.Errorf("Entry new21 gets countVal=%d, want 5", e229.countVal)
+		}
+		if e229.period != 6 {
+			t.Errorf("Entry new21 gets period=%d, want 6", e229.period)
+		}
+	}
+
 	// #233: raw_close check
 	err = d.RawClose("data")
 	if err != nil {
@@ -1461,7 +1513,7 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
 	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 24 { // TODO: eventually 27
+	if ne != 25 { // TODO: eventually 27
 		t.Errorf("d.NEntries counts %d VECTOR entries, want 24", ne)
 	}
 
@@ -1483,6 +1535,52 @@ func TestRead(t *testing.T) {
 
 	// #240: MplexLookback test (returns nothing, so simply call it)
 	d.MplexLookback(LOOKBACKALL)
+
+	// #289: Indir check
+	in289 := []string{"in1", "in2"}
+	err = d.AddIndir("new289", in289[0], in289[1], 0)
+	if err != nil {
+		t.Error("Could not AddIndir in test 289:", err)
+	}
+	e289, err := d.Entry("new289")
+	if err != nil {
+		t.Error("Could not read Entry new289 in test 289:", err)
+	} else {
+		if e289.fieldType != INDIRENTRY {
+			t.Errorf("Entry new289 gets field type 0x%x, want INDIR=0x%x", e289.fieldType, INDIRENTRY)
+		}
+		if e289.fragment != 0 {
+			t.Errorf("Entry new289 gets fragment index=%d, want 0", e289.fragment)
+		}
+		for i := 0; i < len(in289); i++ {
+			if e289.inFields[i] != in289[i] {
+				t.Errorf("Entry new289 inFields[%d]=%s, want %s", i, e289.inFields[i], in289[i])
+			}
+		}
+	}
+
+	// #293: Sindir check
+	in293 := []string{"in1", "in2"}
+	err = d.AddSindir("new293", in293[0], in293[1], 0)
+	if err != nil {
+		t.Error("Could not AddSindir in test 293:", err)
+	}
+	e293, err := d.Entry("new293")
+	if err != nil {
+		t.Error("Could not read Entry new293 in test 293:", err)
+	} else {
+		if e293.fieldType != SINDIRENTRY {
+			t.Errorf("Entry new293 gets field type 0x%x, want SINDIR=0x%x", e293.fieldType, SINDIRENTRY)
+		}
+		if e293.fragment != 0 {
+			t.Errorf("Entry new293 gets fragment index=%d, want 0", e293.fragment)
+		}
+		for i := 0; i < len(in293); i++ {
+			if e293.inFields[i] != in293[i] {
+				t.Errorf("Entry new293 inFields[%d]=%s, want %s", i, e293.inFields[i], in293[i])
+			}
+		}
+	}
 
 	// #302: IncludeNS
 	idxfrag2, err := d.IncludeNS("format2", 0, "ns", CREAT|EXCL)

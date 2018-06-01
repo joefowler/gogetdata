@@ -90,6 +90,9 @@ const CONSTENTRY EntryType = C.GD_CONST_ENTRY
 // DIVIDEENTRY denotes the quotient of two vector fields
 const DIVIDEENTRY EntryType = C.GD_DIVIDE_ENTRY
 
+// INDIRENTRY denotes indirection of a CARRAY scalar indexed by a vector field
+const INDIRENTRY EntryType = C.GD_INDIR_ENTRY
+
 // LINCOMENTRY denotes a linear combination of 1, 2, or 3 vector fields
 const LINCOMENTRY EntryType = C.GD_LINCOM_ENTRY
 
@@ -116,6 +119,9 @@ const RECIPENTRY EntryType = C.GD_RECIP_ENTRY
 
 // SBITENTRY denotes one or more bits out of an input vector field, treating the result as signed
 const SBITENTRY EntryType = C.GD_SBIT_ENTRY
+
+// SINDIRENTRY denotes indirection of a SARRAY scalar indexed by a vector field
+const SINDIRENTRY EntryType = C.GD_SINDIR_ENTRY
 
 // STRINGENTRY denotes a single character string fully specified in the format file metadata
 const STRINGENTRY EntryType = C.GD_STRING_ENTRY

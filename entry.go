@@ -46,6 +46,11 @@ type reciprocal struct {
 	cdividend complex128
 }
 
+type mplex struct {
+	countVal int
+	period   int
+}
+
 // Entry wraps the gd_entry_t object, and is used to access field metadata
 type Entry struct {
 	name      string
@@ -61,7 +66,8 @@ type Entry struct {
 	phaseShift int64
 	reciprocal
 	constType RetType
-	e         *C.gd_entry_t
+	mplex
+	e *C.gd_entry_t
 }
 
 // func entryToC(e *Entry) *C.gd_entry_t {
@@ -143,12 +149,17 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 	case PHASEENTRY:
 		e.phaseShift = int64(*(*C.gd_int64_t)(unsafe.Pointer(base)))
 
-	case CONSTENTRY:
-		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
-
+	case MPLEXENTRY:
 		// for i := 0; i < 19; i++ {
 		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
 		// }
+		e.countVal = int(*(*C.int)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.int(0))
+		e.period = int(*(*C.int)(unsafe.Pointer(base)))
+
+	case CONSTENTRY:
+		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
+
 	}
 	return e
 }
