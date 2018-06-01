@@ -706,6 +706,20 @@ func (df *Dirfile) AddCarray(fieldname string, constType RetType, data interface
 	return nil
 }
 
+// AddConst adds a CONST field to the dirfile
+func (df *Dirfile) AddConst(fieldname string, constType RetType, data interface{},
+	fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	dataType, pvalue := value2type(data)
+	result := C.gd_add_const(df.d, fcode, C.gd_type_t(constType),
+		C.gd_type_t(dataType), pvalue, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddLincom adds a LINCOM field to the dirfile
 func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64,
 	fragmentIndex int) error {
@@ -713,7 +727,8 @@ func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64
 	defer C.free(unsafe.Pointer(fcode))
 	nfields := len(inFields)
 	if nfields != len(m) || nfields != len(b) {
-		return fmt.Errorf("AddCLincom needs inFields, m, and b to be of equal length")
+		fmt.Printf("Yikes! lengths %d %d %d\n", nfields, len(m), len(b))
+		return fmt.Errorf("AddLincom needs inFields, m, and b to be of equal length")
 	}
 	cpointers := make([]uintptr, nfields)
 	for i, infield := range inFields {
@@ -769,6 +784,34 @@ func (df *Dirfile) AddLinterp(fieldname, inField, table string, fragmentIndex in
 	return nil
 }
 
+// AddMultiply adds a MULTIPLY field to the dirfile
+func (df *Dirfile) AddMultiply(fieldname, inField1, inField2 string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield1 := C.CString(inField1)
+	defer C.free(unsafe.Pointer(cfield1))
+	cfield2 := C.CString(inField2)
+	defer C.free(unsafe.Pointer(cfield2))
+	result := C.gd_add_multiply(df.d, fcode, cfield1, cfield2, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddPhase adds a PHASE field to the dirfile
+func (df *Dirfile) AddPhase(fieldname, inField string, shift int64, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield := C.CString(inField)
+	defer C.free(unsafe.Pointer(cfield))
+	result := C.gd_add_phase(df.d, fcode, cfield, C.gd_int64_t(shift), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddPolynom adds a Polynom field to the dirfile
 func (df *Dirfile) AddPolynom(fieldname, inField string, a []float64, fragmentIndex int) error {
 	fcode := C.CString(fieldname)
@@ -779,6 +822,23 @@ func (df *Dirfile) AddPolynom(fieldname, inField string, a []float64, fragmentIn
 	ncoef := len(a)
 	polyOrder := ncoef - 1
 	result := C.gd_add_polynom(df.d, fcode, C.int(polyOrder), ifield, (*C.double)(unsafe.Pointer(&a[0])),
+		C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddCPolynom adds a complex-valued Polynom field to the dirfile
+func (df *Dirfile) AddCPolynom(fieldname, inField string, a []complex128, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+
+	ncoef := len(a)
+	polyOrder := ncoef - 1
+	result := C.gd_add_cpolynom(df.d, fcode, C.int(polyOrder), ifield, (*C.double)(unsafe.Pointer(&a[0])),
 		C.int(fragmentIndex))
 	if result < 0 {
 		return df.Error()

@@ -943,6 +943,77 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #61: Mult check
+	in61 := []string{"in1", "in2"}
+	err = d.AddMultiply("new9", in61[0], in61[1], 0)
+	if err != nil {
+		t.Error("Could not AddMultiply in test 61:", err)
+	}
+	e61, err := d.Entry("new9")
+	if err != nil {
+		t.Error("Could not read Entry new9 in test 61:", err)
+	} else {
+		if e61.fieldType != MULTIPLYENTRY {
+			t.Errorf("Entry new9 gets field type 0x%x, want MULTIPLY=0x%x", e61.fieldType, MULTIPLYENTRY)
+		}
+		if e61.fragment != 0 {
+			t.Errorf("Entry new9 gets fragment index=%d, want 0", e61.fragment)
+		}
+		for i := 0; i < len(in61); i++ {
+			if e61.inFields[i] != in61[i] {
+				t.Errorf("Entry new9 inFields[%d]=%s, want %s", i, e61.inFields[i], in61[i])
+			}
+		}
+	}
+
+	// #62: Phase check
+	in62 := []string{"in1"}
+	shift62 := int64(22)
+	err = d.AddPhase("new10", in62[0], shift62, 0)
+	if err != nil {
+		t.Error("Could not AddPhase in test 62:", err)
+	}
+	e62, err := d.Entry("new10")
+	if err != nil {
+		t.Error("Could not read Entry new10 in test 62:", err)
+	} else {
+		if e62.fieldType != PHASEENTRY {
+			t.Errorf("Entry new10 gets field type 0x%x, want PHASE=0x%x", e62.fieldType, PHASEENTRY)
+		}
+		if e62.fragment != 0 {
+			t.Errorf("Entry new10 gets fragment index=%d, want 0", e62.fragment)
+		}
+		for i := 0; i < len(in62); i++ {
+			if e62.inFields[i] != in62[i] {
+				t.Errorf("Entry new10 inFields[%d]=%s, want %s", i, e62.inFields[i], in62[i])
+			}
+		}
+		if e62.phaseShift != shift62 {
+			t.Errorf("Entry new10 gets phaseShift=%d, want %d", e62.fieldType, shift62)
+		}
+	}
+
+	// #63: Const check
+	v63 := float32(5.6)
+	err = d.AddConst("new11", FLOAT64, v63, 0)
+	if err != nil {
+		t.Error("Could not AddConst in test 63:", err)
+	}
+	e63, err := d.Entry("new11")
+	if err != nil {
+		t.Error("Could not read Entry new11 in test 63:", err)
+	} else {
+		if e63.fieldType != CONSTENTRY {
+			t.Errorf("Entry new11 gets field type 0x%x, want CONST=0x%x", e63.fieldType, CONSTENTRY)
+		}
+		if e63.fragment != 0 {
+			t.Errorf("Entry new11 gets fragment index=%d, want 0", e63.fragment)
+		}
+		if e63.constType != FLOAT64 {
+			t.Errorf("Entry new11 gets const type 0x%x, want FLOAT64=0x%x", e63.constType, FLOAT64)
+		}
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
@@ -963,14 +1034,13 @@ func TestRead(t *testing.T) {
 
 	// #67: NFieldsByType check
 	nlincom := d.NFieldsByType(LINCOMENTRY)
-	if nlincom != 1 { // TODO: update to 3 when we've added vectors in earlier tests
+	if nlincom != 3 {
 		t.Errorf("NFieldsByType(LINCOMENTRY) returned %d, want 1", nlincom)
 	}
 
 	// #68: FieldListByType check
 	ftnames := d.FieldListByType(LINCOMENTRY)
-	// trueftnames := []string{"new2","new3","lincom"} TODO: use this line
-	trueftnames := []string{"lincom"}
+	trueftnames := []string{"new2", "new3", "lincom"}
 	if len(ftnames) != len(trueftnames) {
 		t.Errorf("FieldListByType length is %d, want %d", len(ftnames), len(trueftnames))
 	} else {
@@ -983,8 +1053,8 @@ func TestRead(t *testing.T) {
 
 	// #69: NVectors check
 	nvec := d.NVectors()
-	if nvec != 20 { // TODO: update to 25 when we've added vectors in earlier tests
-		t.Errorf("NVectors = %d, want 20", nvec)
+	if nvec != 25 {
+		t.Errorf("NVectors = %d, want 25", nvec)
 	}
 
 	// #70: VectorList check
@@ -1391,8 +1461,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
 	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 14 { // TODO: eventually 27
-		t.Errorf("d.NEntries counts %d VECTOR entries, want 14", ne)
+	if ne != 24 { // TODO: eventually 27
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 24", ne)
 	}
 
 	// #239: EntryList check
@@ -1400,13 +1470,9 @@ func TestRead(t *testing.T) {
 	if len(entryList) != int(ne) {
 		t.Errorf("d.EntryList return %d entries, want %d", len(entryList), ne)
 	} else {
-		// trueEntries := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
-		// 	"new4", "new5", "new6", "new7", "new8", "sbit", "INDEX",
-		// 	"indir", "mplex", "new14", "new15", "new16", "new18", "new21", "phase", "recip", "lincom",
-		// 	"window", "linterp", "polynom"}
-		// TODO: use the above
-		trueEntries := []string{"bit", "div", "data", "mult", "sbit", "INDEX",
-			"indir", "mplex", "phase", "recip", "lincom",
+		trueEntries := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
+			"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
+			"indir", "mplex", "new14", "new15", "new16", "new18", "new21", "phase", "recip", "lincom",
 			"window", "linterp", "polynom"}
 		for i := 0; i < int(ne); i++ {
 			if entryList[i] != trueEntries[i] {
