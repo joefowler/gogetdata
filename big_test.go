@@ -772,12 +772,9 @@ func TestRead(t *testing.T) {
 
 	// #55: CLincom (complex) check
 	in55 := []string{"in1", "in2"}
-	var m55 [2]complex128
-	m55[0] = complex(1.1, 1.2)
-	m55[1] = complex(1.4, 1.5)
-	var b55 [2]complex128
-	b55[0] = complex(1.3, 1.4)
-	b55[1] = complex(1.6, 1.7)
+	m55 := []complex128{complex(1.1, 1.2), complex(1.4, 1.5)}
+	b55 := []complex128{complex(1.3, 1.4), complex(1.6, 1.7)}
+
 	err = d.AddCLincom("new3", in55, m55, b55, 0)
 	if err != nil {
 		t.Error("Could not AddCLincom in test 55:", err)
@@ -799,11 +796,11 @@ func TestRead(t *testing.T) {
 			if e55.inFields[i] != in55[i] {
 				t.Errorf("Entry new3 inFields[%d]=%s, want %s", i, e55.inFields[i], in55[i])
 			}
-			if e55.m[i] != m55[i] {
-				t.Errorf("Entry new3 m[%d]=%f, want %f", i, e55.m[i], m55[i])
+			if e55.cm[i] != m55[i] {
+				t.Errorf("Entry new3 m[%d]=%f, want %f", i, e55.cm[i], m55[i])
 			}
-			if e55.b[i] != b55[i] {
-				t.Errorf("Entry new3 b[%d]=%f, want %f", i, e55.b[i], b55[i])
+			if e55.cb[i] != b55[i] {
+				t.Errorf("Entry new3 b[%d]=%f, want %f", i, e55.cb[i], b55[i])
 			}
 		}
 	}

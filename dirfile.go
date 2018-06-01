@@ -730,6 +730,30 @@ func (df *Dirfile) AddLincom(fieldname string, inFields []string, m, b []float64
 	return nil
 }
 
+// AddCLincom adds a LINCOM field with complex parameters to the dirfile
+func (df *Dirfile) AddCLincom(fieldname string, inFields []string, m, b []complex128,
+	fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	nfields := len(inFields)
+	if nfields != len(m) || nfields != len(b) {
+		return fmt.Errorf("AddCLincom needs inFields, m, and b to be of equal length")
+	}
+	cpointers := make([]uintptr, nfields)
+	for i, infield := range inFields {
+		cstr := C.CString(infield)
+		defer C.free(unsafe.Pointer(cstr))
+		cpointers[i] = uintptr(unsafe.Pointer(cstr))
+	}
+	result := C.gd_add_clincom(df.d, fcode, C.int(nfields), (**C.char)(unsafe.Pointer(&cpointers[0])),
+		(*C.complexdouble)(unsafe.Pointer(&m[0])),
+		(*C.complexdouble)(unsafe.Pointer(&b[0])), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddLinterp adds a LINTERP field to the dirfile
 func (df *Dirfile) AddLinterp(fieldname, inField, table string, fragmentIndex int) error {
 	fcode := C.CString(fieldname)
