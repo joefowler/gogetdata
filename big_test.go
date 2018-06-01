@@ -1509,10 +1509,44 @@ func TestRead(t *testing.T) {
 		t.Errorf("Could not call FlushAll")
 	}
 
-	// #201 metaflush check
+	// #210 metaflush check
 	err = d.MetaFlush()
 	if err != nil {
 		t.Errorf("Could not call MetaFlush")
+	}
+
+	// #212: AddWindow check
+	err = d.AddWindow("new18", "in1", "in2", WINDOPNE, 32, 0)
+	if err != nil {
+		t.Error("AddWindow error in test 212: ", err)
+	}
+	e212, err := d.Entry("new18")
+	if err != nil {
+		t.Error("Entry error in test 212: ", err)
+	} else {
+		if e212.fieldType != WINDOWENTRY {
+			t.Errorf("Entry new20 (alias) gets field type 0x%x, want WINDOW=0x%x", e212.fieldType, WINDOWENTRY)
+		}
+		if e212.fragment != 0 {
+			t.Errorf("Entry new20 gets fragment index=%d, want 0", e212.fragment)
+		}
+	}
+
+	// #219: AddAlias check
+	err = d.AddAlias("new20", "data", 0)
+	if err != nil {
+		t.Error("AddAlias error in test 219: ", err)
+	}
+	e219, err := d.Entry("new20")
+	if err != nil {
+		t.Error("Entry error in test 219: ", err)
+	} else {
+		if e219.fieldType != RAWENTRY {
+			t.Errorf("Entry new20 (alias) gets field type 0x%x, want RAW=0x%x", e219.fieldType, RAWENTRY)
+		}
+		if e219.fragment != 0 {
+			t.Errorf("Entry new20 gets fragment index=%d, want 0", e219.fragment)
+		}
 	}
 
 	// #229: AddMplex check
@@ -1587,8 +1621,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
 	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 27 {
-		t.Errorf("d.NEntries counts %d VECTOR entries, want 27", ne)
+	if ne != 28 {
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 28", ne)
 	}
 
 	// #239: EntryList check

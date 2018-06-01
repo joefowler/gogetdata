@@ -978,6 +978,37 @@ func (df *Dirfile) AddString(fieldname, value string, fragmentIndex int) error {
 	return nil
 }
 
+// AddWindow adds a WINDOW field to the dirfile
+func (df *Dirfile) AddWindow(fieldname, indexField, checkField string,
+	windowOp WindowOps, threshold interface{},
+	fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	cfield1 := C.CString(indexField)
+	defer C.free(unsafe.Pointer(cfield1))
+	cfield2 := C.CString(checkField)
+	defer C.free(unsafe.Pointer(cfield2))
+	result := C.gd_add_window(df.d, fcode, cfield1, cfield2, C.gd_windop_t(windowOp),
+		(*(*C.gd_triplet_t)(unsafe.Pointer(&threshold))), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddAlias adds a ALIAS field to the dirfile
+func (df *Dirfile) AddAlias(fieldname, target string, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ctarget := C.CString(target)
+	defer C.free(unsafe.Pointer(ctarget))
+	result := C.gd_add_alias(df.d, fcode, ctarget, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // Delete deletes an entry from the Dirfile
 func (df *Dirfile) Delete(fieldname string, flags DeleteFlags) error {
 	fcode := C.CString(fieldname)

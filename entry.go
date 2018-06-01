@@ -51,6 +51,13 @@ type mplex struct {
 	period   int
 }
 
+type window struct {
+	windOp     WindowOps
+	iThreshold int64
+	uThreshold uint64
+	fThreshold float64
+}
+
 // Entry wraps the gd_entry_t object, and is used to access field metadata
 type Entry struct {
 	name      string
@@ -65,8 +72,8 @@ type Entry struct {
 	bits
 	phaseShift int64
 	reciprocal
-
 	mplex
+	window
 	constType RetType
 	arrayLen  int
 	e         *C.gd_entry_t
@@ -157,13 +164,20 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		e.period = int(*(*C.int)(unsafe.Pointer(base)))
 
 	case CONSTENTRY, SARRAYENTRY:
-		// for i := 0; i < 19; i++ {
-		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
-		// }
 		e.constType = RetType(*(*C.gd_type_t)(unsafe.Pointer(base)))
 		base += unsafe.Sizeof(C.long(0))
 		e.arrayLen = int(*(*C.size_t)(unsafe.Pointer(base)))
 
+	case WINDOWENTRY:
+		e.windOp = WindowOps(*(*C.gd_windop_t)(unsafe.Pointer(base)))
+		base += unsafe.Sizeof(C.gd_windop_t(0))
+		e.iThreshold = int64(*(*C.int64_t)(unsafe.Pointer(base)))
+		e.uThreshold = uint64(*(*C.uint64_t)(unsafe.Pointer(base)))
+		e.fThreshold = float64(*(*C.double_t)(unsafe.Pointer(base)))
+
+		// for i := 0; i < 19; i++ {
+		// 	fmt.Printf("%16.16x\n", *(*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(base)) + uintptr(i*8))))
+		// }
 	}
 	return e
 }

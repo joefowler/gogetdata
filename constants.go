@@ -8,6 +8,8 @@ package getdata
 */
 import "C"
 
+///
+
 // Flags are dirfile-opening flags, including encoding methods
 type Flags uint64
 
@@ -70,7 +72,7 @@ const TRUNCSUB Flags = C.GD_TRUNCSUB
 // UNENCODED means data are raw binary, not compressed
 const UNENCODED Flags = C.GD_UNENCODED
 
-// **
+///
 
 // EntryType signifies the field type given for entries in the FORMAT files
 type EntryType int64
@@ -175,6 +177,9 @@ const LOOKBACKALL int = -1
 // FRAMEHERE indicates the current location of the I/O pointer
 const FRAMEHERE int = C.GD_HERE
 
+///
+
+// DeleteFlags are flags for the Dirfile.Delete function
 type DeleteFlags uint64
 
 // DELETEDATA indicates delete the binary file associated with the RAW field
@@ -188,3 +193,35 @@ const DELETEFORCE DeleteFlags = C.GD_DEL_FORCE
 
 // DELETEMETA indicates delete metafields attached to the field
 const DELETEMETA DeleteFlags = C.GD_DEL_META
+
+///
+
+// WindowOps are operations used in a WINDOW field
+type WindowOps uint64
+
+// WINDOPEQ means check field equals threshold
+const WINDOPEQ WindowOps = C.GD_WINDOP_EQ
+
+// WINDOPNE means check field does not equal threshold
+const WINDOPNE WindowOps = C.GD_WINDOP_NE
+
+// WINDOPSET means at least one bit set in threshold is also set in the check field
+const WINDOPSET WindowOps = C.GD_WINDOP_SET
+
+// WINDOPCLR means at least one bit set in threshold is not set in the check field
+const WINDOPCLR WindowOps = C.GD_WINDOP_CLR
+
+// WINDOPGE means the check field is greater than or equal to threshold
+const WINDOPGE WindowOps = C.GD_WINDOP_GE
+
+// WINDOPGT means the check field is strictly greater than threshold
+const WINDOPGT WindowOps = C.GD_WINDOP_GT
+
+// WINDOPLE means the check field is less than or equal to threshold
+const WINDOPLE WindowOps = C.GD_WINDOP_LE
+
+// WINDOPLT means the check field is strictly less than threshold
+const WINDOPLT WindowOps = C.GD_WINDOP_LT
+
+// WINDOPUNK means an invalid value
+const WINDOPUNK WindowOps = C.GD_WINDOP_UNK
