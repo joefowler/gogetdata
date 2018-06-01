@@ -893,6 +893,32 @@ func (df *Dirfile) AddCPolynom(fieldname, inField string, a []complex128, fragme
 	return nil
 }
 
+// AddRecip adds a RECIP field to the dirfile
+func (df *Dirfile) AddRecip(fieldname, inField string, dividend float64, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+	result := C.gd_add_recip(df.d, fcode, ifield, C.double(dividend), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// AddCRecip adds a CRECIP field to the dirfile
+func (df *Dirfile) AddCRecip(fieldname, inField string, dividend complex128, fragmentIndex int) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	ifield := C.CString(inField)
+	defer C.free(unsafe.Pointer(ifield))
+	result := C.gd_add_crecip89(df.d, fcode, ifield, (*C.double)(unsafe.Pointer(&dividend)), C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
 // AddSbit adds a SBIT field to the dirfile
 func (df *Dirfile) AddSbit(fieldname, inField string, bitnum, numbits, fragmentIndex int) error {
 	fcode := C.CString(fieldname)
@@ -915,6 +941,16 @@ func (df *Dirfile) AddSindir(fieldname, indexField, carrayField string, fragment
 	cfield2 := C.CString(carrayField)
 	defer C.free(unsafe.Pointer(cfield2))
 	result := C.gd_add_sindir(df.d, fcode, cfield1, cfield2, C.int(fragmentIndex))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+func (df *Dirfile) Delete(fieldname string, flags DeleteFlags) error {
+	fcode := C.CString(fieldname)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_delete(df.d, fcode, C.uint(flags))
 	if result < 0 {
 		return df.Error()
 	}

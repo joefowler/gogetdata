@@ -171,3 +171,17 @@ const LOOKBACKALL int = -1
 
 // FRAMEHERE indicates the current location of the I/O pointer
 const FRAMEHERE int = C.GD_HERE
+
+type DeleteFlags uint64
+
+// DELETEDATA indicates delete the binary file associated with the RAW field
+const DELETEDATA DeleteFlags = C.GD_DEL_DATA
+
+// DELETEDEREF indicates dereference a CONST field used as a field parameter
+const DELETEDEREF DeleteFlags = C.GD_DEL_DEREF
+
+// DELETEFORCE indicates delete the field even if it's an input to other fields
+const DELETEFORCE DeleteFlags = C.GD_DEL_FORCE
+
+// DELETEMETA indicates delete metafields attached to the field
+const DELETEMETA DeleteFlags = C.GD_DEL_META

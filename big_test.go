@@ -1254,6 +1254,16 @@ func TestRead(t *testing.T) {
 		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
 
+	// #122: Dirfile.Delete check
+	err = d.Delete("new10", 0)
+	if err != nil {
+		t.Error("Could not Delete in test 122:", err)
+	}
+	_, err = d.Entry("new10")
+	if err == nil {
+		t.Error("Loaded entry new10 after it was deleted in test 122:", err)
+	}
+
 	// #138: PutData (auto) check duplicates #37, so skip it.
 
 	// #146: Divide check
@@ -1275,6 +1285,53 @@ func TestRead(t *testing.T) {
 		for i := 0; i < len(in146); i++ {
 			if e146.inFields[i] != in146[i] {
 				t.Errorf("Entry new14 inFields[%d]=%s, want %s", i, e146.inFields[i], in146[i])
+			}
+		}
+	}
+
+	// #147: Recip check
+	in147 := []string{"in3"}
+	err = d.AddRecip("new15", in147[0], 31.9, 0)
+	if err != nil {
+		t.Error("Could not AddRecip in test 147:", err)
+	}
+	e147, err := d.Entry("new15")
+	if err != nil {
+		t.Error("Could not read Entry new15 in test 147:", err)
+	} else {
+		if e147.fieldType != RECIPENTRY {
+			t.Errorf("Entry new15 gets field type 0x%x, want RECIP=0x%x", e147.fieldType, RECIPENTRY)
+		}
+		if e147.fragment != 0 {
+			t.Errorf("Entry new15 gets fragment index=%d, want 0", e147.fragment)
+		}
+		for i := 0; i < len(in147); i++ {
+			if e147.inFields[i] != in147[i] {
+				t.Errorf("Entry new15 inFields[%d]=%s, want %s", i, e147.inFields[i], in147[i])
+			}
+		}
+	}
+
+	// #148: CRecip check
+	in148 := []string{"in2"}
+	d148 := complex(33.3, 44.4)
+	err = d.AddCRecip("new16", in148[0], d148, 0)
+	if err != nil {
+		t.Error("Could not AddCRecip in test 148:", err)
+	}
+	e148, err := d.Entry("new16")
+	if err != nil {
+		t.Error("Could not read Entry new16 in test 148:", err)
+	} else {
+		if e148.fieldType != RECIPENTRY {
+			t.Errorf("Entry new16 gets field type 0x%x, want RECIP=0x%x", e148.fieldType, RECIPENTRY)
+		}
+		if e148.fragment != 0 {
+			t.Errorf("Entry new16 gets fragment index=%d, want 0", e148.fragment)
+		}
+		for i := 0; i < len(in148); i++ {
+			if e148.inFields[i] != in148[i] {
+				t.Errorf("Entry new16 inFields[%d]=%s, want %s", i, e148.inFields[i], in148[i])
 			}
 		}
 	}
