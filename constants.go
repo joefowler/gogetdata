@@ -11,7 +11,7 @@ import "C"
 ///
 
 // Flags are dirfile-opening flags, including encoding methods
-type Flags uint64
+type Flags int64
 
 // RDONLY open read-only
 const RDONLY Flags = C.GD_RDONLY
@@ -68,9 +68,6 @@ const PERMISSIVE Flags = C.GD_PERMISSIVE
 
 // TRUNCSUB if truncating a dirfile, also delete subdirectories. Ignored if TRUNC is not also specified.
 const TRUNCSUB Flags = C.GD_TRUNCSUB
-
-// UNENCODED means data are raw binary, not compressed
-const UNENCODED Flags = C.GD_UNENCODED
 
 ///
 
@@ -225,3 +222,27 @@ const WINDOPLT WindowOps = C.GD_WINDOP_LT
 
 // WINDOPUNK means an invalid value
 const WINDOPUNK WindowOps = C.GD_WINDOP_UNK
+
+///
+
+// SeekFlags are flags for Dirfile.Seek
+type SeekFlags uint
+
+const SEEKSET SeekFlags = C.GD_SEEK_SET
+const SEEKCUR SeekFlags = C.GD_SEEK_CUR
+const SEEKEND SeekFlags = C.GD_SEEK_END
+const SEEKWRITE SeekFlags = C.GD_SEEK_WRITE
+
+/// Encoding methods
+
+const AUTOENCODED Flags = C.GD_AUTO_ENCODED
+const UNENCODED Flags = C.GD_UNENCODED
+const TEXTENCODED Flags = C.GD_TEXT_ENCODED
+const SLIMENCODED Flags = C.GD_SLIM_ENCODED
+const GZIPENCODED Flags = C.GD_GZIP_ENCODED
+const BZIP2ENCODED Flags = C.GD_BZIP2_ENCODED
+const LZMAENCODED Flags = C.GD_LZMA_ENCODED
+const SIEENCODED Flags = C.GD_SIE_ENCODED
+const ZZIPENCODED Flags = C.GD_ZZIP_ENCODED
+const ZZSLIMENCODED Flags = C.GD_ZZSLIM_ENCODED
+const FLACENCODED Flags = C.GD_FLAC_ENCODED

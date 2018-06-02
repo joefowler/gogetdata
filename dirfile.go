@@ -215,7 +215,8 @@ func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, 
 	n := C.gd_getdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
 		C.size_t(numFrames), C.size_t(numSamples), C.gd_type_t(retType), ptr)
 	if n == 0 {
-		return 0, df.Error()
+		return 0, fmt.Errorf("gd_getdata with args (\"%s\",%d,%d,%d,%d,0x%x,%p) returned 0 and error: %s",
+			fieldcode, firstFrame, firstSample, numFrames, numSamples, retType, ptr, df.Error().Error())
 	}
 	return int(n), nil
 }
@@ -409,6 +410,44 @@ func (df *Dirfile) PutString(fieldcode, value string) error {
 	return nil
 }
 
+// Seek repositions the I/O pointer of the field named fieldcode.
+// flags should be one of SEEKSET, SEEKCUR, SEEKEND, to indicate that the given
+// framenum, samplenum pair are relative to the beginning of the field, the current
+// position, or the end of the field. Then bitwise OR that choice of flags with
+// SEEKWRITE if the next operation on that field's data will be a PutData write.
+// Returns the new offset of the pointer and any error.
+func (df *Dirfile) Seek(fieldcode string, framenum, samplenum int, flags SeekFlags) (int, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := int(C.gd_seek(df.d, fcode, C.off_t(framenum), C.off_t(samplenum), C.int(flags)))
+	if result < 0 {
+		return 0, fmt.Errorf("Dirfile.Seek returned %d", result)
+	}
+	return result, nil
+}
+
+// Tell returns the position of the I/O pointer, in samples, of the field named fieldcode.
+func (df Dirfile) Tell(fieldcode string) (int, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := int(C.gd_tell(df.d, fcode))
+	if result < 0 {
+		return 0, fmt.Errorf("Dirfile.Tell returned %d", result)
+	}
+	return result, nil
+}
+
+// EncodingSupport determines whether a given encoding is supported by the library
+func EncodingSupport(encoding Flags) (bool, error) {
+	result := C.gd_encoding_support(C.ulong(encoding))
+	if result < 0 {
+		return false, fmt.Errorf("EncodingSupport(0x%x) returned -1", encoding)
+	}
+	return (result > 0), nil
+}
+
+// Reading Metadata
+
 // Dirfilename returns the full path to the dirfile
 func (df Dirfile) Dirfilename() string {
 	result := C.gd_dirfilename(df.d)
@@ -465,6 +504,20 @@ func (df Dirfile) FragmentIndex(fieldcode string) (int, error) {
 		return 0, df.Error()
 	}
 	return result, nil
+}
+
+// Validate checks whether a given field code is valid, returning error if it isn't.
+// Any function which accepts a field code as an argument performs the same checks
+// as this function, so it is not necessary to call this function to verify a field
+// code before passing it to another function.
+func (df Dirfile) Validate(fieldcode string) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := int(C.gd_validate(df.d, fcode))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
 }
 
 // NEntries returns the number of fields in the dirfile satisfying various criteria.

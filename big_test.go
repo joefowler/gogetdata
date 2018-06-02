@@ -1293,6 +1293,20 @@ func TestRead(t *testing.T) {
 		t.Error("Loaded entry new10 after it was deleted in test 122:", err)
 	}
 
+	// #131: Validate check
+	err = d.Validate("new1")
+	if err != nil {
+		t.Error("Validate on new1 returned error:", err)
+	}
+	err = d.Validate("new7")
+	if err == nil {
+		t.Error("Validate on new7 returned no error, want error") // because relies on invalid input "in"
+	}
+	err = d.Validate("asldfkjhsdlfkjh")
+	if err == nil {
+		t.Error("Validate accepted an incorrect field name")
+	}
+
 	// #138: PutData (auto) check duplicates #37, so skip it.
 
 	// #146: Divide check
@@ -1491,6 +1505,34 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #203: Seek check
+	location203 := 7
+	n203, err := d.Seek("data", location203, 0, SEEKSET|SEEKWRITE)
+	if err != nil {
+		t.Error("Could not Seek on dirfile: ", err)
+	} else {
+		if n203 != 8*location203 {
+			t.Errorf("Seek returned %d, want %d", n203, 8*location203)
+		}
+		data := make([]uint16, 12)
+		m, err2 := d.GetData("data", FRAMEHERE, 0, 1, 0, &data)
+		if err2 != nil {
+			t.Error("Could not GetData after Seek in test 203: ", err2)
+		} else if m != 8 {
+			t.Errorf("GetData after Seek in test 203 returns %d, want 8", m)
+		}
+	}
+
+	// #204 Tell check
+	n204, err := d.Tell("data")
+	if err != nil {
+		t.Error("Could not Tell on dirfile: ", err)
+	} else {
+		if n204 != 8*location203+8 {
+			t.Errorf("Tell returned %d, want %d", n204, 8*location203+8)
+		}
+	}
+
 	// #208: Sync check
 	err = d.Sync("data")
 	if err != nil {
@@ -1653,6 +1695,14 @@ func TestRead(t *testing.T) {
 
 	// #240: MplexLookback test (returns nothing, so simply call it)
 	d.MplexLookback(LOOKBACKALL)
+
+	// #271: EncodingSupport
+	r271, err := EncodingSupport(SIEENCODED)
+	if err != nil {
+		t.Error("EncodingSupport failed:", err)
+	} else if !r271 {
+		t.Errorf("EncodingSupport(SIEENCODED) returned false, want true")
+	}
 
 	// #283: Sarray check
 	in283 := []string{"str1", "str2", "str4", "str8"}
