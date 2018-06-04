@@ -1523,6 +1523,23 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #200: Strings test
+	n200 := d.NMFieldsByType("data", STRINGENTRY)
+	if n200 != 1 {
+		t.Errorf("NMFieldsByType returns %d, want 1", n200)
+	}
+	s200, err := d.MStrings("data")
+	if err != nil {
+		t.Error("MStrings() failed: ", err)
+	} else {
+		expected := []string{"This is a string constant."}
+		for i := 0; i < len(expected); i++ {
+			if s200[i] != expected[i] {
+				t.Errorf("Strings returned s[%d]=%s, want %s", i, s199[i], expected[i])
+			}
+		}
+	}
+
 	// #203: Seek check
 	location203 := 7
 	n203, err := d.Seek("data", location203, 0, SEEKSET|SEEKWRITE)
@@ -1720,6 +1737,31 @@ func TestRead(t *testing.T) {
 		t.Error("EncodingSupport failed:", err)
 	} else if !r271 {
 		t.Errorf("EncodingSupport(SIEENCODED) returned false, want true")
+	}
+
+	// #278: GetSarray test
+	s278 := []string{"one", "two", "three", "four", "five", "six", "seven"}
+	a278, err := d.GetSarray("sarray")
+	if err != nil {
+		t.Error("GetSarray failed on test 278: ", err)
+	} else {
+		for i := 0; i < len(s278); i++ {
+			if a278[i] != s278[i] {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a278[i], s278[i])
+			}
+		}
+	}
+
+	// #279: GetSarraySlice test
+	a279, err := d.GetSarraySlice("sarray", 4, 3)
+	if err != nil {
+		t.Error("GetSarraySlice failed on test 279: ", err)
+	} else {
+		for i := 4; i < len(s278); i++ {
+			if a279[i-4] != s278[i] {
+				t.Errorf("GetSarraySlice returns val[%d]=%s, want %s", i-4, a279[i-4], s278[i])
+			}
+		}
 	}
 
 	// #281: PutSarray test

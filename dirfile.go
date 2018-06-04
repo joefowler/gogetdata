@@ -337,6 +337,29 @@ func (df Dirfile) GetSarray(fieldcode string) ([]string, error) {
 	return sarray, nil
 }
 
+// GetSarraySlice fetches a portion of the elements in an SARRAY field.
+func (df Dirfile) GetSarraySlice(fieldcode string, start, n uint) ([]string, error) {
+	nstr := df.ArrayLen(fieldcode)
+	var dummyptr *C.char
+	cptr := (**C.char)(C.malloc(C.ulong(uintptr(nstr) * unsafe.Sizeof(dummyptr))))
+
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	result := C.gd_get_sarray_slice(df.d, fcode, C.ulong(start), C.size_t(n), cptr)
+	if result < 0 {
+		return nil, df.Error()
+	}
+	cstr0 := *cptr
+	sarray := make([]string, nstr)
+	for i := 0; i < nstr; i++ {
+		sarray[i] = C.GoString(cstr0)
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *cptr
+	}
+	return sarray, nil
+}
+
 // GetString returns the value of a STRING field (including metafields)
 func (df Dirfile) GetString(fieldcode string) (string, error) {
 	fcode := C.CString(fieldcode)
@@ -355,6 +378,31 @@ func (df Dirfile) Strings() ([]string, error) {
 	cptr := (**C.char)(C.gd_strings(df.d))
 	if cptr == (**C.char)(C.NULL) {
 		return nil, fmt.Errorf("Dirfile.Strings returned NULL")
+	}
+
+	var result []string
+	listend := (*C.char)(C.NULL)
+	cstr0 := *cptr
+	INSANE := 10000
+	for i := 0; i < INSANE; i++ {
+		result = append(result, C.GoString(cstr0))
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *cptr
+		if cstr0 == listend {
+			return result, nil
+		}
+	}
+	return result, nil
+}
+
+// MStrings returns the value of all STRING fields for a specified parent
+func (df Dirfile) MStrings(parent string) ([]string, error) {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+
+	cptr := (**C.char)(C.gd_mstrings(df.d, cparent))
+	if cptr == (**C.char)(C.NULL) {
+		return nil, fmt.Errorf("Dirfile.MStrings returned NULL")
 	}
 
 	var result []string
