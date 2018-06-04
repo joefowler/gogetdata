@@ -314,6 +314,29 @@ func (df Dirfile) GetCarraySlice(fieldcode string, start, n uint, out interface{
 // func (df Dirfile) GetCarrays(fieldcode string, retType RetType) []
 // Hmm. Not sure how to do this one!
 
+// GetSarray fetches a list of the value of all elements in an SARRAY field.
+func (df Dirfile) GetSarray(fieldcode string) ([]string, error) {
+	nstr := df.ArrayLen(fieldcode)
+	var dummyptr *C.char
+	cptr := (**C.char)(C.malloc(C.ulong(uintptr(nstr) * unsafe.Sizeof(dummyptr))))
+
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	result := C.gd_get_sarray(df.d, fcode, cptr)
+	if result < 0 {
+		return nil, df.Error()
+	}
+	cstr0 := *cptr
+	sarray := make([]string, nstr)
+	for i := 0; i < nstr; i++ {
+		sarray[i] = C.GoString(cstr0)
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *cptr
+	}
+	return sarray, nil
+}
+
 // GetString returns the value of a STRING field (including metafields)
 func (df Dirfile) GetString(fieldcode string) (string, error) {
 	fcode := C.CString(fieldcode)
@@ -392,6 +415,66 @@ func (df *Dirfile) PutCarray(fieldcode string, array interface{}) error {
 	dType, ptr, _ := array2type(array)
 	n := C.gd_put_carray(df.d, fcode, C.gd_type_t(dType), ptr)
 	if n != 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// PutCarraySlice stores a portion of a CARRAY field (including metafields)
+func (df *Dirfile) PutCarraySlice(fieldcode string, start, n uint, array interface{}) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	dType, ptr, _ := array2type(array)
+	result := C.gd_put_carray_slice(df.d, fcode, C.ulong(start), C.size_t(n), C.gd_type_t(dType), ptr)
+	if result != 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// PutSarray stores an entire SARRAY field (including metafields)
+func (df *Dirfile) PutSarray(fieldcode string, sarray []string) error {
+	nstr := len(sarray)
+	if nstr != df.ArrayLen(fieldcode) {
+		return fmt.Errorf("Field %s length %d doesn't match length %d of sarray argument",
+			fieldcode, df.ArrayLen(fieldcode), nstr)
+	}
+
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	cpointers := make([]uintptr, nstr)
+	for i, instring := range sarray {
+		cstr := C.CString(instring)
+		defer C.free(unsafe.Pointer(cstr))
+		cpointers[i] = uintptr(unsafe.Pointer(cstr))
+	}
+	result := C.gd_put_sarray(df.d, fcode, (**C.char)(unsafe.Pointer(&cpointers[0])))
+	if result != 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// PutSarraySlice stores a portion of an SARRAY field (including metafields)
+func (df *Dirfile) PutSarraySlice(fieldcode string, start, n uint, sarray []string) error {
+	nstr := len(sarray)
+	if nstr != int(n) {
+		return fmt.Errorf("Slice n=%d doesn't match length %d of sarray argument",
+			n, nstr)
+	}
+
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	cpointers := make([]uintptr, nstr)
+	for i, instring := range sarray {
+		cstr := C.CString(instring)
+		defer C.free(unsafe.Pointer(cstr))
+		cpointers[i] = uintptr(unsafe.Pointer(cstr))
+	}
+	result := C.gd_put_sarray_slice(df.d, fcode, C.ulong(start), C.size_t(n), (**C.char)(unsafe.Pointer(&cpointers[0])))
+	if result != 0 {
 		return df.Error()
 	}
 	return nil

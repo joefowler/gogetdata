@@ -1467,23 +1467,41 @@ func TestRead(t *testing.T) {
 
 	// #168: PutCarray test
 	p168 := []float64{9.6, 8.5, 7.4, 6.3, 5.2, 4.1}
-	err = d.PutCarray("carray", p168)
-	if err != nil {
+	if err = d.PutCarray("carray", p168); err != nil {
 		t.Error("PutCarray failed: ", err)
 	}
-	err = d.GetCarray("carray", &a158)
-	if err != nil {
+	if err = d.GetCarray("carray", &a158); err != nil {
 		t.Error("GetCarray failed on test 168: ", err)
 	} else {
 		for i := 0; i < 6; i++ {
-			if math.Abs(a158[i]-9.6+1.1*float64(i)) > 1e-6 {
-				t.Errorf("GetCarray returns v[%d]=%.2f, want %.2f", i, a158[i], 9.6+1.1*float64(i))
+			expect := 9.6 - 1.1*float64(i)
+			if math.Abs(a158[i]-expect) > 1e-6 {
+				t.Errorf("GetCarray returns v[%d]=%.2f, want %.2f", i, a158[i], expect)
 			}
 		}
 	}
 	err = d.PutCarray("sdfsdfasf", p168)
 	if err == nil {
 		t.Error("PutCarray did not error when passed an invalid field name")
+	}
+
+	// #169: PutCarraySlice test
+	p169 := []float64{2.2, 3.3}
+	if err = d.PutCarraySlice("carray", 2, 2, p169); err != nil {
+		t.Error("PutCarraySlice failed: ", err)
+	}
+	if err = d.GetCarray("carray", &a158); err != nil {
+		t.Error("GetCarray failed on test 169: ", err)
+	} else {
+		for i := 0; i < 6; i++ {
+			expect := 9.6 - 1.1*float64(i)
+			if i == 2 || i == 3 {
+				expect = float64(i) * 1.1
+			}
+			if math.Abs(a158[i]-expect) > 1e-6 {
+				t.Errorf("GetCarray returns v[%d]=%.2f, want %.2f", i, a158[i], expect)
+			}
+		}
 	}
 
 	// #177: ArrayLen test
@@ -1702,6 +1720,42 @@ func TestRead(t *testing.T) {
 		t.Error("EncodingSupport failed:", err)
 	} else if !r271 {
 		t.Errorf("EncodingSupport(SIEENCODED) returned false, want true")
+	}
+
+	// #281: PutSarray test
+	s281 := []string{"eka", "vdi", "tri", "catur", "panca", "sas", "sapta"}
+	if err = d.PutSarray("sarray", s281); err != nil {
+		t.Error("PutSarray failed: ", err)
+	}
+	a281, err := d.GetSarray("sarray")
+	if err != nil {
+		t.Error("GetSarray failed on test 281: ", err)
+	} else {
+		for i := 0; i < len(s281); i++ {
+			if a281[i] != s281[i] {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a281[i], s281[i])
+			}
+		}
+	}
+	if err = d.PutSarray("sarray", s281[:3]); err == nil {
+		t.Error("PutSarray did not error when an array of the wrong length")
+	}
+
+	// #282: PutSarraySlice test
+	s281[4] = "astra"
+	s281[5] = "nava"
+	if err = d.PutSarraySlice("sarray", 4, 2, s281[4:6]); err != nil {
+		t.Error("PutSarraySlice failed: ", err)
+	}
+	a282, err := d.GetSarray("sarray")
+	if err != nil {
+		t.Error("GetSarray failed on test 282: ", err)
+	} else {
+		for i := 0; i < len(s281); i++ {
+			if a282[i] != s281[i] {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a282[i], s281[i])
+			}
+		}
 	}
 
 	// #283: Sarray check
