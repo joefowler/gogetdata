@@ -1745,9 +1745,9 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Error("GetSarray failed on test 278: ", err)
 	} else {
-		for i := 0; i < len(s278); i++ {
-			if a278[i] != s278[i] {
-				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a278[i], s278[i])
+		for i, s := range s278 {
+			if a278[i] != s {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a278[i], s)
 			}
 		}
 	}
@@ -1760,6 +1760,22 @@ func TestRead(t *testing.T) {
 		for i := 4; i < len(s278); i++ {
 			if a279[i-4] != s278[i] {
 				t.Errorf("GetSarraySlice returns val[%d]=%s, want %s", i-4, a279[i-4], s278[i])
+			}
+		}
+	}
+
+	// #280: Sarrays test
+	a280, err := d.Sarrays()
+	if err != nil {
+		t.Error("Sarrays failed on test 280: ", err)
+	} else if len(a280) != 1 {
+		t.Errorf("Sarrays returns array length %d, want 1", len(a280))
+	} else if len(a280[0]) != 7 {
+		t.Errorf("Sarrays returns array[0] length %d, want 7", len(a280[0]))
+	} else {
+		for i, s := range s278 {
+			if a280[0][i] != s {
+				t.Errorf("Sarrays returns s[0][%d] = %s, want %s", i, a280[0][i], s)
 			}
 		}
 	}
@@ -1818,6 +1834,45 @@ func TestRead(t *testing.T) {
 		}
 		if e283.arrayLen != len(in283) {
 			t.Errorf("Entry new283 gets %d fields, want %d", e283.nFields, len(in283))
+		}
+	}
+
+	// #285: AddSarray test
+	s285 := []string{"alice", "bob"}
+	if err = d.AddSarray("data/mnew285", s285, 0); err != nil {
+		t.Error("AddSarray failed on test 285:", err)
+	}
+	e285, err := d.Entry("data/mnew285")
+	if err != nil {
+		t.Error("Entry failed on test 285:", err)
+	} else {
+		if e285.fieldType != SARRAYENTRY {
+			t.Errorf("Entry on test 285 returned field type 0x%x, want SARRAY=0x%x", e285.fieldType, SARRAYENTRY)
+		}
+		if e285.fragment != 0 {
+			t.Errorf("Entry on test 285 returned fragment %d, want 0", e285.fragment)
+		}
+		if e285.arrayLen != 2 {
+			t.Errorf("Entry on test 285 returned arrayLen %d, want 2", e285.arrayLen)
+		}
+	}
+
+	// #287: MSarrays test
+	a287, err := d.MSarrays("data")
+	if err != nil {
+		t.Error("MSarrays failed on test 287:", err)
+	} else if len(a287) != 2 {
+		t.Errorf("MSarrays returned array length %d, want 2", len(a287))
+		s287 := []string{"eight", "nine", "ten", "eleven", "twelve"}
+		for i, s := range s287 {
+			if a287[0][i] != s {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a287[0][i], s)
+			}
+		}
+		for i, s := range s285 {
+			if a287[1][i] != s {
+				t.Errorf("GetSarray returns val[%d]=%s, want %s", i, a287[1][i], s)
+			}
 		}
 	}
 

@@ -360,6 +360,71 @@ func (df Dirfile) GetSarraySlice(fieldcode string, start, n uint) ([]string, err
 	return sarray, nil
 }
 
+// Sarrays returns the value of all SARRAY fields (including metafields)
+func (df Dirfile) Sarrays() ([][]string, error) {
+	cptr := (***C.char)(C.gd_sarrays(df.d))
+	if cptr == (***C.char)(C.NULL) {
+		return nil, fmt.Errorf("Dirfile.Sarrays returned NULL")
+	}
+
+	var result [][]string
+	list1end := (**C.char)(C.NULL)
+	list0end := (*C.char)(C.NULL)
+	INSANE := 10000
+	for i := 0; i < INSANE; i++ {
+		clist1 := *cptr
+		if clist1 == list1end {
+			return result, nil
+		}
+		result = append(result, make([]string, 0))
+		cstr0 := *clist1
+		for j := 0; j < INSANE; j++ {
+			if cstr0 == list0end {
+				break
+			}
+			result[i] = append(result[i], C.GoString(cstr0))
+			clist1 = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(clist1)) + unsafe.Sizeof(cstr0)))
+			cstr0 = *clist1
+		}
+		cptr = (***C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(clist1)))
+	}
+	return result, nil
+}
+
+// MSarrays returns the value of all SARRAY fields for a given parent field
+func (df Dirfile) MSarrays(parent string) ([][]string, error) {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+
+	cptr := (***C.char)(C.gd_msarrays(df.d, cparent))
+	if cptr == (***C.char)(C.NULL) {
+		return nil, fmt.Errorf("Dirfile.MSarrays returned NULL")
+	}
+
+	var result [][]string
+	list1end := (**C.char)(C.NULL)
+	list0end := (*C.char)(C.NULL)
+	INSANE := 10000
+	for i := 0; i < INSANE; i++ {
+		clist1 := *cptr
+		if clist1 == list1end {
+			return result, nil
+		}
+		result = append(result, make([]string, 0))
+		cstr0 := *clist1
+		for j := 0; j < INSANE; j++ {
+			result[i] = append(result[i], C.GoString(cstr0))
+			clist1 = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(clist1)) + unsafe.Sizeof(cstr0)))
+			cstr0 = *clist1
+			if cstr0 == list0end {
+				break
+			}
+		}
+		cptr = (***C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(clist1)))
+	}
+	return result, nil
+}
+
 // GetString returns the value of a STRING field (including metafields)
 func (df Dirfile) GetString(fieldcode string) (string, error) {
 	fcode := C.CString(fieldcode)
