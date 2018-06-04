@@ -228,21 +228,50 @@ const WINDOPUNK WindowOps = C.GD_WINDOP_UNK
 // SeekFlags are flags for Dirfile.Seek
 type SeekFlags uint
 
+// SEEKSET means file position is relative to the beginning of field
 const SEEKSET SeekFlags = C.GD_SEEK_SET
+
+// SEEKCUR means file position is relative to the current position
 const SEEKCUR SeekFlags = C.GD_SEEK_CUR
+
+// SEEKEND means file position is relative to the end of field
 const SEEKEND SeekFlags = C.GD_SEEK_END
+
+// SEEKWRITE means the next operation on the field will be a write via PutData
 const SEEKWRITE SeekFlags = C.GD_SEEK_WRITE
 
-/// Encoding methods
+/// Encoding methods. See http://getdata.sourceforge.net/dirfile.html for
+/// further information on the methods
 
+// AUTOENCODED means encoding should be detected by getdata library.
 const AUTOENCODED Flags = C.GD_AUTO_ENCODED
+
+// UNENCODED means raw data are not encoded
 const UNENCODED Flags = C.GD_UNENCODED
+
+// TEXTENCODED means raw data are text encoded
 const TEXTENCODED Flags = C.GD_TEXT_ENCODED
+
+// SLIMENCODED means raw data are encoded by slimlib
 const SLIMENCODED Flags = C.GD_SLIM_ENCODED
+
+// GZIPENCODED means raw data are gzip encoded by zlib
 const GZIPENCODED Flags = C.GD_GZIP_ENCODED
+
+// BZIP2ENCODED means raw data are bzip2 encoded
 const BZIP2ENCODED Flags = C.GD_BZIP2_ENCODED
+
+// LZMAENCODED means raw data are lzma encoded
 const LZMAENCODED Flags = C.GD_LZMA_ENCODED
+
+// SIEENCODED means raw data are sample-index encoded
 const SIEENCODED Flags = C.GD_SIE_ENCODED
+
+// ZZIPENCODED means raw data are zzip encoded
 const ZZIPENCODED Flags = C.GD_ZZIP_ENCODED
+
+// ZZSLIMENCODED means raw data are encoded by a combination of zzip and slimlib
 const ZZSLIMENCODED Flags = C.GD_ZZSLIM_ENCODED
+
+// FLACENCODED means raw data are FLAC encoded
 const FLACENCODED Flags = C.GD_FLAC_ENCODED
