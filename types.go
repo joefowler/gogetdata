@@ -59,6 +59,24 @@ const NULLTYPE RetType = C.GD_NULL
 // in an error)
 const UNKNOWN RetType = C.GD_UNKNOWN
 
+func sizeof(t RetType) uint {
+	switch t {
+	case INT8, UINT8:
+		return 1
+	case INT16, UINT16:
+		return 2
+	case INT32, UINT32, FLOAT32:
+		return 4
+	case INT64, UINT64, FLOAT64, COMPLEX64:
+		return 8
+	case COMPLEX128:
+		return 16
+	case STRING, NULLTYPE, UNKNOWN:
+		return 0
+	}
+	return 0
+}
+
 // parray2type accepts a pointer to a slice of numeric values and returns the
 // matching RetType from the GetData library and an unsafe.Pointer to the
 // first value in the underlying array.

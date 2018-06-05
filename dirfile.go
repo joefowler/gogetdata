@@ -5,6 +5,7 @@ package getdata
 #cgo LDFLAGS: -L/usr/local/lib -lgetdata
 #include <getdata.h>
 #include <stdlib.h>
+#include <string.h>
 */
 import "C"
 import (
@@ -279,6 +280,41 @@ func (df Dirfile) GetConstantComplex128(fieldcode string) (complex128, error) {
 	return c, df.GetConstant(fieldcode, &c)
 }
 
+// Constants fills the numerical slice out with all CONST fields in the dirfile
+func (df Dirfile) Constants(out interface{}) error {
+	dType, ptr, arrayLen := array2type(out)
+	n := df.NFieldsByType(CONSTENTRY)
+	if arrayLen < int(n) {
+		return fmt.Errorf("Constants was supplied an array of length %d, but needs to be at least %d",
+			arrayLen, n)
+	}
+	result := C.gd_constants(df.d, C.gd_type_t(dType))
+	if result == C.NULL {
+		return fmt.Errorf("gd_constants returns error")
+	}
+	C.memcpy(ptr, result, C.ulong(n*sizeof(dType)))
+	return nil
+}
+
+// MConstants fills the numerical slice out with all CONST fields for a specified parent
+func (df Dirfile) MConstants(parent string, out interface{}) error {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+
+	dType, ptr, arrayLen := array2type(out)
+	n := df.NMFieldsByType(parent, CONSTENTRY)
+	if arrayLen < int(n) {
+		return fmt.Errorf("MConstants was supplied an array of length %d, but needs to be at least %d",
+			arrayLen, n)
+	}
+	result := C.gd_mconstants(df.d, cparent, C.gd_type_t(dType))
+	if result == C.NULL {
+		return fmt.Errorf("gd_mconstants returns error")
+	}
+	C.memcpy(ptr, result, C.ulong(n*sizeof(dType)))
+	return nil
+}
+
 // GetCarray fills the numeric array pointed to by out with a list of the values
 // of all elements in a CARRAY field (including metafields).
 func (df Dirfile) GetCarray(fieldcode string, out interface{}) error {
@@ -353,6 +389,9 @@ func (df Dirfile) GetSarraySlice(fieldcode string, start, n uint) ([]string, err
 	cstr0 := *cptr
 	sarray := make([]string, nstr)
 	for i := 0; i < nstr; i++ {
+		if cstr0 == (*C.char)(C.NULL) {
+			break
+		}
 		sarray[i] = C.GoString(cstr0)
 		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
 		cstr0 = *cptr
@@ -483,6 +522,20 @@ func (df Dirfile) MStrings(parent string) ([]string, error) {
 		}
 	}
 	return result, nil
+}
+
+// FramenumSubset performs reverse loop-up on a portion of a field. Assumes the portion is monotonic.
+func (df Dirfile) FramenumSubset(fieldcode string, value float64, start, end int) float64 {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return float64(C.gd_framenum_subset(df.d, fcode, C.double(value), C.off_t(start), C.off_t(end)))
+}
+
+// Framenum performs reverse loop-up on a field. Assumes the entire field is monotonic.
+func (df Dirfile) Framenum(fieldcode string, value float64) float64 {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return float64(C.gd_framenum(df.d, fcode, C.double(value)))
 }
 
 // PutData stores data to a vector field in the dirfile (incl. metafields)

@@ -1307,6 +1307,16 @@ func TestRead(t *testing.T) {
 		t.Error("Validate accepted an incorrect field name")
 	}
 
+	// #133: Framenum check
+	f133 := d.Framenum("data", 52.5)
+	if math.Abs(f133-6.4375) > 1e-5 {
+		t.Errorf("Framenum returns %.5g, want %.5g", f133, 6.4375)
+	}
+	f133s := d.FramenumSubset("data", 52.5, 6, 0)
+	if math.Abs(f133s-6.4375) > 1e-5 {
+		t.Errorf("Framenum returns %.5g, want %.5g", f133s, 6.4375)
+	}
+
 	// #138: PutData (auto) check duplicates #37, so skip it.
 
 	// #146: Divide check
@@ -1508,6 +1518,42 @@ func TestRead(t *testing.T) {
 	l177 := d.ArrayLen("carray")
 	if l177 != 6 {
 		t.Errorf("ArrayLen(\"carray\") returned %d, want 6", l177)
+	}
+
+	// #183: Constants test
+	n183 := int(d.NFieldsByType(CONSTENTRY))
+	a183 := make([]float64, n183)
+	if err = d.Constants(a183); err != nil {
+		t.Error("Constants() failed: ", err)
+	} else {
+		expect183 := []float64{93, 5.6, -19}
+		if len(expect183) != n183 {
+			t.Errorf("NFieldsByType(CONSTENTRY) returns %d values, want %d", n183, len(expect183))
+		} else {
+			for i, e := range expect183 {
+				if math.Abs(a183[i]-e) > 1e-6 {
+					t.Errorf("Constants() fills val[%d]=%f, want %f", i, a183[i], e)
+				}
+			}
+		}
+	}
+
+	// #184: MConstants test
+	n184 := int(d.NMFieldsByType("data", CONSTENTRY))
+	a184 := make([]float64, n184)
+	if err = d.MConstants("data", a184); err != nil {
+		t.Error("MConstants() failed: ", err)
+	} else {
+		expect184 := []float64{3.3}
+		if len(expect184) != n184 {
+			t.Errorf("NMFieldsByType(\"data\", CONSTENTRY) returns %d values, want %d", n184, len(expect184))
+		} else {
+			for i, e := range expect184 {
+				if math.Abs(a184[i]-e) > 1e-6 {
+					t.Errorf("MConstants(\"data\") fills val[%d]=%f, want %f", i, a184[i], e)
+				}
+			}
+		}
 	}
 
 	// #199: Strings test
