@@ -216,8 +216,7 @@ func (df Dirfile) GetData(fieldcode string, firstFrame, firstSample, numFrames, 
 	n := C.gd_getdata(df.d, fcode, C.off_t(firstFrame), C.off_t(firstSample),
 		C.size_t(numFrames), C.size_t(numSamples), C.gd_type_t(retType), ptr)
 	if n == 0 {
-		return 0, fmt.Errorf("gd_getdata with args (\"%s\",%d,%d,%d,%d,0x%x,%p) returned 0 and error: %s",
-			fieldcode, firstFrame, firstSample, numFrames, numSamples, retType, ptr, df.Error().Error())
+		return 0, df.Error()
 	}
 	return int(n), nil
 }
@@ -750,6 +749,13 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 	return NewFragment(&df, n)
 }
 
+// SPF returns the number of samples per frame for a given field
+func (df Dirfile) SPF(fieldcode string) int {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return int(C.gd_spf(df.d, fcode))
+}
+
 // ArrayLen returns the number of elements in a scalar field (CARRAY, CONST,
 // or STRING)
 func (df Dirfile) ArrayLen(fieldcode string) int {
@@ -764,6 +770,7 @@ func (df Dirfile) Entry(fieldcode string) (Entry, error) {
 	defer C.free(unsafe.Pointer(fcode))
 	var ce C.gd_entry_t
 	result := int(C.gd_entry(df.d, fcode, &ce))
+	defer C.gd_free_entry_strings(&ce)
 	if result != 0 {
 		return Entry{}, df.Error()
 	}
@@ -785,6 +792,13 @@ func (df Dirfile) FragmentIndex(fieldcode string) (int, error) {
 		return 0, df.Error()
 	}
 	return result, nil
+}
+
+// NativeType returns the native data type of a field or alias
+func (df Dirfile) NativeType(fieldcode string) RetType {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return RetType(C.gd_native_type(df.d, fcode))
 }
 
 // Validate checks whether a given field code is valid, returning error if it isn't.

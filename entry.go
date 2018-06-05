@@ -76,7 +76,6 @@ type Entry struct {
 	window
 	constType RetType
 	arrayLen  int
-	e         *C.gd_entry_t
 }
 
 // func entryToC(e *Entry) *C.gd_entry_t {
@@ -96,7 +95,6 @@ func entryFromC(ce *C.gd_entry_t) Entry {
 		name:      C.GoString(ce.field),
 		fieldType: EntryType(ce.field_type),
 		flags:     uint(ce.flags),
-		e:         ce,
 	}
 	for i := 0; i < MAXLINCOM; i++ {
 		e.inFields[i] = C.GoString(ce.in_fields[i])

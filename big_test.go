@@ -350,6 +350,12 @@ func TestRead(t *testing.T) {
 		t.Errorf("NFrames returned %d, want 10", nf)
 	}
 
+	// #29: SPF check
+	spf := d.SPF("data")
+	if spf != 8 {
+		t.Errorf("SPF(\"data\") returned %d, want 8", spf)
+	}
+
 	// #30: PutData int32 check
 	dataToPut := []int32{13, 14, 15, 16}
 	n, err = d.PutData("data", 5, 1, dataToPut)
@@ -437,6 +443,16 @@ func TestRead(t *testing.T) {
 				t.Errorf("GetData returned d[%d]=%d in test 37, want %d", i, testData[i], expectedData[i])
 			}
 		}
+	}
+
+	// #38: ErrorString check
+
+	e38 := "Field not found: xyz"
+	if _, err := d.GetData("xyz", 5, 0, 1, 0, &testData); err == nil {
+		t.Error("GetData on non-existent field gives no error, want error")
+	} else if err.Error() != e38 {
+		t.Errorf("GetData on non-existent field gives error string\n\t%s\nwant\n\t%s",
+			err.Error(), e38)
 	}
 
 	// #40: Entry (raw) check
@@ -1014,6 +1030,14 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #64: Fragment check
+	frag64, err := d.Fragment(0)
+	if err != nil {
+		t.Errorf("Could not create a Dirfile.Fragment(0)")
+	} else if !strings.HasSuffix(frag64.name, "dirfile/format") {
+		t.Errorf("frag.name is %s, want ...dirfile/format", frag64.name)
+	}
+
 	// #65: nfragments check
 	nfrag := d.NFragments()
 	if nfrag != 1 {
@@ -1233,12 +1257,13 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// TODO: #99, #100, #102, #104-109
+
 	// #110: Fragment encoding check
 	frag, err := d.Fragment(0)
 	if err != nil {
 		t.Errorf("Could not create a Dirfile.Fragment(0)")
-	}
-	if frag.encoding != UNENCODED {
+	} else if frag.encoding != UNENCODED {
 		t.Errorf("frag.encoding is %d, want %d", frag.encoding, UNENCODED)
 	}
 
@@ -1275,6 +1300,8 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// TODO: #114
+
 	// #115: Fragment.protection check
 	frag1, err = d.Fragment(1)
 	if err != nil {
@@ -1282,6 +1309,8 @@ func TestRead(t *testing.T) {
 	} else if frag1.protection != PROTECTDATA {
 		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
+
+	// TODO: #116-121
 
 	// #122: Dirfile.Delete check
 	err = d.Delete("new10", 0)
@@ -1291,6 +1320,14 @@ func TestRead(t *testing.T) {
 	_, err = d.Entry("new10")
 	if err == nil {
 		t.Error("Loaded entry new10 after it was deleted in test 122:", err)
+	}
+
+	// TODO: #123-128
+
+	// #129: NativeType check
+	nt129 := d.NativeType("data")
+	if nt129 != INT8 {
+		t.Errorf("d.NativeType returns 0x%x, want 0x%x=INT8", nt129, INT8)
 	}
 
 	// #131: Validate check
@@ -1316,6 +1353,8 @@ func TestRead(t *testing.T) {
 	if math.Abs(f133s-6.4375) > 1e-5 {
 		t.Errorf("Framenum returns %.5g, want %.5g", f133s, 6.4375)
 	}
+
+	// TODO: all checks after #133
 
 	// #138: PutData (auto) check duplicates #37, so skip it.
 
