@@ -1475,6 +1475,28 @@ func TestRead(t *testing.T) {
 		t.Error("GetCarraySlice did not error when passed an invalid pointer")
 	}
 
+	// #167: Carrays test
+	a167, err := d.CarraysFloat64()
+	if err != nil {
+		t.Error("CarraysFloat64() failed", err)
+	} else {
+		expect := [][]float64{{1.1, 2.2, 3.3, 4.4, 5.5, 6.6}}
+		if len(a167) != len(expect) {
+			t.Errorf("CarraysFloat64 returns length-%d array, want %d", len(a167), len(expect))
+		}
+		for i, a := range a167 {
+			if len(a) != len(expect[i]) {
+				t.Errorf("CarraysFloat64()[%d] is of length %d, want %d", i, len(a), len(expect[i]))
+			} else {
+				for j, v := range a {
+					if v != expect[i][j] {
+						t.Errorf("CarraysFloat64()[%d][%d] = %f, want %f", i, j, v, expect[i][j])
+					}
+				}
+			}
+		}
+	}
+
 	// #168: PutCarray test
 	p168 := []float64{9.6, 8.5, 7.4, 6.3, 5.2, 4.1}
 	if err = d.PutCarray("carray", p168); err != nil {
@@ -1776,6 +1798,28 @@ func TestRead(t *testing.T) {
 
 	// #240: MplexLookback test (returns nothing, so simply call it)
 	d.MplexLookback(LOOKBACKALL)
+
+	// #242: Carrays test
+	a242, err := d.MCarraysFloat64("data")
+	if err != nil {
+		t.Error("MCarraysFloat64() failed", err)
+	} else {
+		expect := [][]float64{{1.9, 2.8, 3.7, 4.6, 5.5}}
+		if len(a242) != len(expect) {
+			t.Errorf("MCarraysFloat64 returns length-%d array, want %d", len(a242), len(expect))
+		}
+		for i, a := range a242 {
+			if len(a) != len(expect[i]) {
+				t.Errorf("MCarraysFloat64()[%d] is of length %d, want %d", i, len(a), len(expect[i]))
+			} else {
+				for j, v := range a {
+					if v != expect[i][j] {
+						t.Errorf("MCarraysFloat64()[%d][%d] = %f, want %f", i, j, v, expect[i][j])
+					}
+				}
+			}
+		}
+	}
 
 	// #271: EncodingSupport
 	r271, err := EncodingSupport(SIEENCODED)

@@ -347,8 +347,40 @@ func (df Dirfile) GetCarraySlice(fieldcode string, start, n uint, out interface{
 	return nil
 }
 
-// func (df Dirfile) GetCarrays(fieldcode string, retType RetType) []
-// Hmm. Not sure how to do this one!
+// CarraysFloat64 generates a slice of slices constaining all CARRAY fields in the dirfile
+func (df Dirfile) CarraysFloat64() ([][]float64, error) {
+	ptr := C.gd_carrays(df.d, C.gd_type_t(FLOAT64))
+	if ptr == (*C.gd_carray_t)(C.NULL) {
+		return nil, fmt.Errorf("gd_carrays returns error")
+	}
+	carrays := make([][]float64, 0)
+	for (*ptr).n > 0 {
+		a := make([]float64, (*ptr).n)
+		C.memcpy(unsafe.Pointer(&a[0]), (*ptr).d, (*ptr).n*8)
+		carrays = append(carrays, a)
+		ptr = (*C.gd_carray_t)(unsafe.Pointer(uintptr(unsafe.Pointer(ptr)) + unsafe.Sizeof(*ptr)))
+	}
+	return carrays, nil
+}
+
+// MCarraysFloat64 generates a slice of slices constaining all CARRAY fields in the dirfile
+func (df Dirfile) MCarraysFloat64(parent string) ([][]float64, error) {
+	cparent := C.CString(parent)
+	defer C.free(unsafe.Pointer(cparent))
+
+	ptr := C.gd_mcarrays(df.d, cparent, C.gd_type_t(FLOAT64))
+	if ptr == (*C.gd_carray_t)(C.NULL) {
+		return nil, fmt.Errorf("gd_carrays returns error")
+	}
+	carrays := make([][]float64, 0)
+	for (*ptr).n > 0 {
+		a := make([]float64, (*ptr).n)
+		C.memcpy(unsafe.Pointer(&a[0]), (*ptr).d, (*ptr).n*8)
+		carrays = append(carrays, a)
+		ptr = (*C.gd_carray_t)(unsafe.Pointer(uintptr(unsafe.Pointer(ptr)) + unsafe.Sizeof(*ptr)))
+	}
+	return carrays, nil
+}
 
 // GetSarray fetches a list of the value of all elements in an SARRAY field.
 func (df Dirfile) GetSarray(fieldcode string) ([]string, error) {
