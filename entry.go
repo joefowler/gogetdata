@@ -60,6 +60,7 @@ type window struct {
 
 // Entry wraps the gd_entry_t object, and is used to access field metadata
 type Entry struct {
+	df        *Dirfile
 	name      string
 	fieldType EntryType
 	flags     uint
@@ -90,8 +91,9 @@ type Entry struct {
 // 	return cp
 // }
 
-func entryFromC(ce *C.gd_entry_t) Entry {
+func entryFromC(df *Dirfile, ce *C.gd_entry_t) Entry {
 	e := Entry{
+		df:        df,
 		name:      C.GoString(ce.field),
 		fieldType: EntryType(ce.field_type),
 		flags:     uint(ce.flags),
@@ -204,4 +206,8 @@ func BitEntry(name, inField string, bitnum, numbits, fragmentIndex int) Entry {
 	e.numbits = numbits
 	e.bitnum = bitnum
 	return e
+}
+
+func (e Entry) Filename() (string, error) {
+	return e.df.Filename(e.name)
 }

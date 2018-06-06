@@ -1257,7 +1257,15 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	// TODO: #99, #100, #102, #104-109
+	// #99 RawEntry checks
+	e99, err := d.Entry("new1")
+	if err != nil {
+		t.Error("Could not run Dirfile.Entry(\"new1\"):", err)
+	} else {
+		// TODO Finish check
+	}
+
+	// TODO: #100, #102, #104-109
 
 	// #110: Fragment encoding check
 	frag, err := d.Fragment(0)
@@ -1310,7 +1318,19 @@ func TestRead(t *testing.T) {
 		t.Errorf("frag1.protection is 0x%x, want 0x%x", frag1.protection, PROTECTDATA)
 	}
 
-	// TODO: #116-121
+	// #116: Filename check
+	s116a, err := d.Filename("new1")
+	if err != nil {
+		t.Errorf("Could not run Dirfile.Filename")
+	} else if !strings.HasSuffix(s116a, "dirfile/new1") {
+		t.Errorf("Filename is %s, want suffix to be \"dirfile/new1\"", s116a)
+	}
+	s116b, err := e99.Filename()
+	if !strings.HasSuffix(s116b, "dirfile/new1") {
+		t.Errorf("Filename is %s, want suffix to be \"dirfile/new1\"", s116b)
+	}
+
+	// TODO: #117-121
 
 	// #122: Dirfile.Delete check
 	err = d.Delete("new10", 0)
@@ -1322,7 +1342,18 @@ func TestRead(t *testing.T) {
 		t.Error("Loaded entry new10 after it was deleted in test 122:", err)
 	}
 
-	// TODO: #123-128
+	// TODO: #123-125
+
+	// #126 Uninclude check
+	if err = d.Uninclude(1, false); err != nil {
+		t.Error("Uninclude failed:", err)
+	} else {
+		if _, err126 := d.Entry("newer"); err126 == nil {
+			t.Error("d.Entry(\"newer\") did not error after Uninclude, want error")
+		}
+	}
+
+	// TODO: #127-128
 
 	// #129: NativeType check
 	nt129 := d.NativeType("data")
@@ -1587,7 +1618,7 @@ func TestRead(t *testing.T) {
 	if err = d.Constants(a183); err != nil {
 		t.Error("Constants() failed: ", err)
 	} else {
-		expect183 := []float64{93, 5.6, -19}
+		expect183 := []float64{93, 5.6}
 		if len(expect183) != n183 {
 			t.Errorf("NFieldsByType(CONSTENTRY) returns %d values, want %d", n183, len(expect183))
 		} else {
@@ -1743,6 +1774,26 @@ func TestRead(t *testing.T) {
 		}
 	}
 
+	// #223: IncludeAffix checks
+	flags223 := CREAT | EXCL
+	const prefix1 string = "A"
+	const suffix1 string = "Z"
+	if _, err = d.IncludeAffix("format1", 0, prefix1, suffix1, flags223); err != nil {
+		t.Error("IncludeAffix fails:", err)
+	}
+
+	// #226: Fragment affixes checks
+	if frag226, err := d.Fragment(1); err != nil {
+		t.Error("Could not get Fragment(1) in test 226:", err)
+	} else {
+		if frag226.prefix != prefix1 {
+			t.Errorf("Fragment(1) has prefix \"%s\", want \"%s\"", frag226.prefix, prefix1)
+		}
+		if frag226.suffix != suffix1 {
+			t.Errorf("Fragment(1) has suffix \"%s\", want \"%s\"", frag226.suffix, suffix1)
+		}
+	}
+
 	// #229: AddMplex check
 	in229 := []string{"in1", "in2"}
 	err = d.AddMplex("new21", in229[0], in229[1], 5, 6, 0)
@@ -1837,6 +1888,15 @@ func TestRead(t *testing.T) {
 
 	// #240: MplexLookback test (returns nothing, so simply call it)
 	d.MplexLookback(LOOKBACKALL)
+
+	// #241: LinterpTablename check
+	if s241, err1 := d.LinterpTablename("linterp"); err1 != nil {
+		t.Error("Could not call LinterpTablename:", err1)
+	} else {
+		if !strings.HasSuffix(s241, "dirfile/lut") {
+			t.Errorf("d.LinterpTablename() returns '%s', want suffix to be '%s'", s241, "dirfile/lut")
+		}
+	}
 
 	// #242: Carrays test
 	a242, err := d.MCarraysFloat64("data")

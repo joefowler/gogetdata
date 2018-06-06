@@ -7,7 +7,9 @@ package getdata
 #include <stdlib.h>
 */
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+)
 
 // PROTECTNONE protects neither data nor format for a fragment
 const PROTECTNONE Flags = C.GD_PROTECT_NONE
@@ -55,6 +57,17 @@ func NewFragment(df *Dirfile, index int) (*Fragment, error) {
 		}
 	}
 
+	// Find the gd_verbose_prefix and suffix
+	var pfx, sfx *C.char
+	result := C.gd_fragment_affixes(df.d, cidx, &pfx, &sfx)
+	if result != 0 {
+		return nil, df.Error()
+	}
+	frag.prefix = C.GoString(pfx)
+	frag.suffix = C.GoString(sfx)
+	C.free(unsafe.Pointer(pfx))
+	C.free(unsafe.Pointer(sfx))
+
 	return frag, nil
 }
 
@@ -88,4 +101,14 @@ func (frag *Fragment) SetNamespace(ns string) error {
 	}
 	frag.namespace = ns
 	return nil
+}
+
+// Prefix returns the fragment field name prefix
+func (frag Fragment) Prefix() string {
+	return frag.prefix
+}
+
+// Suffix returns the fragment field name suffix
+func (frag Fragment) Suffix() string {
+	return frag.suffix
 }

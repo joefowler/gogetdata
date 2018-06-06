@@ -386,6 +386,7 @@ func (df Dirfile) GetSarray(fieldcode string) ([]string, error) {
 	nstr := df.ArrayLen(fieldcode)
 	var dummyptr *C.char
 	cptr := (**C.char)(C.malloc(C.ulong(uintptr(nstr) * unsafe.Sizeof(dummyptr))))
+	defer C.free(unsafe.Pointer(cptr))
 
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -405,10 +406,14 @@ func (df Dirfile) GetSarray(fieldcode string) ([]string, error) {
 }
 
 // GetSarraySlice fetches a portion of the elements in an SARRAY field.
-func (df Dirfile) GetSarraySlice(fieldcode string, start, n uint) ([]string, error) {
+func (df Dirfile) GetSarraySlice(fieldcode string, start, n int) ([]string, error) {
 	nstr := df.ArrayLen(fieldcode)
-	var dummyptr *C.char
-	cptr := (**C.char)(C.malloc(C.ulong(uintptr(nstr) * unsafe.Sizeof(dummyptr))))
+	if n > nstr {
+		return nil, fmt.Errorf("GetSarraySlice called with n=%d, which exceeds ArrayLen=%d",
+			n, nstr)
+	}
+	cptr := (**C.char)(C.malloc(C.ulong(uintptr(nstr) * unsafe.Sizeof(C.NULL))))
+	defer C.free(unsafe.Pointer(cptr))
 
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
@@ -418,8 +423,8 @@ func (df Dirfile) GetSarraySlice(fieldcode string, start, n uint) ([]string, err
 		return nil, df.Error()
 	}
 	cstr0 := *cptr
-	sarray := make([]string, nstr)
-	for i := 0; i < nstr; i++ {
+	sarray := make([]string, n)
+	for i := 0; i < n; i++ {
 		if cstr0 == (*C.char)(C.NULL) {
 			break
 		}
@@ -501,6 +506,7 @@ func (df Dirfile) GetString(fieldcode string) (string, error) {
 	defer C.free(unsafe.Pointer(fcode))
 	bsize := C.size_t(256)
 	cresult := (*C.char)(C.malloc(bsize))
+	defer C.free(unsafe.Pointer(cresult))
 	n := int(C.gd_get_string(df.d, fcode, bsize, cresult))
 	if n == 0 {
 		return "", df.Error()
@@ -749,6 +755,28 @@ func (df Dirfile) Fragment(n int) (*Fragment, error) {
 	return NewFragment(&df, n)
 }
 
+// LinterpTablename returns the path to the lookup table associated with a LINTERP field
+func (df Dirfile) LinterpTablename(fieldcode string) (string, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_linterp_tablename(df.d, fcode)
+	if result == (*C.char)(C.NULL) {
+		return "", df.Error()
+	}
+	return C.GoString(result), nil
+}
+
+// Filename returns the path to the binary file for a given RAW field
+func (df Dirfile) Filename(fieldcode string) (string, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_raw_filename(df.d, fcode)
+	if result == (*C.char)(C.NULL) {
+		return "", df.Error()
+	}
+	return C.GoString(result), nil
+}
+
 // SPF returns the number of samples per frame for a given field
 func (df Dirfile) SPF(fieldcode string) int {
 	fcode := C.CString(fieldcode)
@@ -765,7 +793,7 @@ func (df Dirfile) ArrayLen(fieldcode string) int {
 }
 
 // Entry returns the dirfile entry with the given name
-func (df Dirfile) Entry(fieldcode string) (Entry, error) {
+func (df *Dirfile) Entry(fieldcode string) (Entry, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
 	var ce C.gd_entry_t
@@ -778,7 +806,7 @@ func (df Dirfile) Entry(fieldcode string) (Entry, error) {
 	if err != nil {
 		return Entry{}, fmt.Errorf("FragmentIndex error: %s", err.Error())
 	}
-	entry := entryFromC(&ce)
+	entry := entryFromC(df, &ce)
 	entry.fragment = idx
 	return entry, nil
 }
@@ -953,14 +981,29 @@ func (df Dirfile) MFieldListByType(parent string, et EntryType) []string {
 		C.gd_mfield_list_by_type(df.d, cparent, C.gd_entype_t(et))))
 }
 
+// IncludeAffix adds the named fragment to the dirfile with given prefix and suffix.
+func (df *Dirfile) IncludeAffix(fragname string, index int, prefix, suffix string, flags Flags) (int, error) {
+	fragmentname := C.CString(fragname)
+	defer C.free(unsafe.Pointer(fragmentname))
+	cprefix := C.CString(prefix)
+	defer C.free(unsafe.Pointer(cprefix))
+	csuffix := C.CString(suffix)
+	defer C.free(unsafe.Pointer(csuffix))
+	result := int(C.gd_include_affix(df.d, fragmentname, C.int(index), cprefix, csuffix, C.ulong(flags)))
+	if result < 0 {
+		return result, df.Error()
+	}
+	return result, nil
+}
+
 // Include adds the named fragment to the dirfile.
-func (df *Dirfile) Include(file string, flags Flags) (int, error) {
-	return df.IncludeAtIndex(file, 0, flags)
+func (df *Dirfile) Include(fragname string, flags Flags) (int, error) {
+	return df.IncludeAtIndex(fragname, 0, flags)
 }
 
 // IncludeAtIndex adds the named fragment to the dirfile at the given index.
-func (df *Dirfile) IncludeAtIndex(file string, index int, flags Flags) (int, error) {
-	fragmentname := C.CString(file)
+func (df *Dirfile) IncludeAtIndex(fragname string, index int, flags Flags) (int, error) {
+	fragmentname := C.CString(fragname)
 	defer C.free(unsafe.Pointer(fragmentname))
 	result := int(C.gd_include(df.d, fragmentname, C.int(index), C.ulong(flags)))
 	if result < 0 {
@@ -970,8 +1013,8 @@ func (df *Dirfile) IncludeAtIndex(file string, index int, flags Flags) (int, err
 }
 
 // IncludeNS adds the named fragment to the dirfile at the given index, adding a namespace.
-func (df *Dirfile) IncludeNS(file string, index int, namespace string, flags Flags) (int, error) {
-	fragmentname := C.CString(file)
+func (df *Dirfile) IncludeNS(fragname string, index int, namespace string, flags Flags) (int, error) {
+	fragmentname := C.CString(fragname)
 	defer C.free(unsafe.Pointer(fragmentname))
 	cnamespace := C.CString(namespace)
 	defer C.free(unsafe.Pointer(cnamespace))
