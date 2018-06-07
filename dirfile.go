@@ -824,6 +824,20 @@ func (df Dirfile) FragmentIndex(fieldcode string) (int, error) {
 	return result, nil
 }
 
+// EoF returns the end-of-field position, in frames
+func (df Dirfile) EoF(fieldcode string) int {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return int(C.gd_eof(df.d, fcode))
+}
+
+// BoF returns the beginning-of-field position, in frames
+func (df Dirfile) BoF(fieldcode string) int {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return int(C.gd_bof(df.d, fcode))
+}
+
 // NativeType returns the native data type of a field or alias
 func (df Dirfile) NativeType(fieldcode string) RetType {
 	fcode := C.CString(fieldcode)
@@ -1038,6 +1052,29 @@ func (df *Dirfile) Uninclude(index int, del bool) error {
 		return df.Error()
 	}
 	return nil
+}
+
+// GetReference returns the reference entry
+func (df *Dirfile) GetReference() (Entry, error) {
+	result := C.gd_reference(df.d, nullCString)
+	if result == nullCString {
+		var e Entry
+		return e, df.Error()
+	}
+	return df.Entry(C.GoString(result))
+}
+
+// SetReference changes the reference entry to be the one named by fieldcode
+func (df *Dirfile) SetReference(fieldcode string) (Entry, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	result := C.gd_reference(df.d, fcode)
+	if result == nullCString {
+		var e Entry
+		return e, df.Error()
+	}
+	return df.Entry(C.GoString(result))
 }
 
 // AddEntry adds a field to a dirfile.

@@ -1330,7 +1330,27 @@ func TestRead(t *testing.T) {
 		t.Errorf("Filename is %s, want suffix to be \"dirfile/new1\"", s116b)
 	}
 
-	// TODO: #117-121
+	// #117: SetReference, GetReference check
+	if e117, err1 := d.SetReference("new1"); err1 != nil {
+		t.Error("Could not SetReference in test 117:", err1)
+	} else if e117.name != "new1" {
+		t.Errorf("SetReference(\"new1\") returned entry named %s, want new1", e117.name)
+	}
+	if e117, err1 := d.GetReference(); err1 != nil {
+		t.Error("Could not GetReference in test 117:", err1)
+	} else if e117.name != "new1" {
+		t.Errorf("GetReference() returned entry named %s, want new1", e117.name)
+	}
+	if _, err1 := d.SetReference("lincom"); err1 == nil {
+		t.Errorf("SetReference to a LINCOM field did not fail, want error")
+	}
+
+	// #118: EoF check
+	if n118 := d.EoF("lincom"); n118 != 80 {
+		t.Errorf("EoF returns %d, want 80", n118)
+	}
+
+	// TODO: #119-121
 
 	// #122: Dirfile.Delete check
 	err = d.Delete("new10", 0)
@@ -1410,6 +1430,12 @@ func TestRead(t *testing.T) {
 				t.Errorf("Entry new14 inFields[%d]=%s, want %s", i, e146.inFields[i], in146[i])
 			}
 		}
+	}
+
+	// #142: BoF check
+	// TODO: expect 264 once all tests in place
+	if n142 := d.BoF("lincom"); n142 != 0 {
+		t.Errorf("BoF returns %d, want 0", n142)
 	}
 
 	// #147: Recip check
