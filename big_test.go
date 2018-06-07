@@ -1818,17 +1818,37 @@ func TestRead(t *testing.T) {
 	// #219: AddAlias check
 	err = d.AddAlias("new20", "data", 0)
 	if err != nil {
-		t.Error("AddAlias error in test 219: ", err)
+		t.Error("AddAlias error in test 219:", err)
 	}
 	e219, err := d.Entry("new20")
 	if err != nil {
-		t.Error("Entry error in test 219: ", err)
+		t.Error("Entry error in test 219:", err)
 	} else {
 		if e219.fieldType != RAWENTRY {
 			t.Errorf("Entry new20 (alias) gets field type 0x%x, want RAW=0x%x", e219.fieldType, RAWENTRY)
 		}
 		if e219.fragment != 0 {
 			t.Errorf("Entry new20 gets fragment index=%d, want 0", e219.fragment)
+		}
+	}
+
+	// #221: NAliases check
+	expect222 := []string{"data", "alias", "new20"}
+	// expect222 := []string{"data", "alias", "data/mnew20", "new20"}
+	if n221 := d.NAliases("data"); n221 != len(expect222) {
+		t.Errorf("NAliases(data) returns %d, want %d", n221, len(expect222))
+	}
+
+	// #222: Aliases check
+	if a222, err1 := d.Aliases("data"); err1 != nil {
+		t.Error("Aliases error in test 222:", err)
+	} else if len(a222) != len(expect222) {
+		t.Errorf("Aliases returns list of length %d, want length %d", len(a222), len(expect222))
+	} else {
+		for i, s := range a222 {
+			if s != expect222[i] {
+				t.Errorf("Aliases()[%d]=%s, want %s", i, s, expect222[i])
+			}
 		}
 	}
 
@@ -1841,8 +1861,8 @@ func TestRead(t *testing.T) {
 	}
 
 	// #226: Fragment affixes checks
-	if frag226, err := d.Fragment(1); err != nil {
-		t.Error("Could not get Fragment(1) in test 226:", err)
+	if frag226, err1 := d.Fragment(1); err1 != nil {
+		t.Error("Could not get Fragment(1) in test 226:", err1)
 	} else {
 		if frag226.prefix != prefix1 {
 			t.Errorf("Fragment(1) has prefix \"%s\", want \"%s\"", frag226.prefix, prefix1)

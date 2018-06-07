@@ -877,6 +877,40 @@ func (df Dirfile) Hidden(fieldcode string) (bool, error) {
 	return result > 0, nil
 }
 
+// Aliases returns a list of aliases of a given field code
+func (df Dirfile) Aliases(fieldcode string) ([]string, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+
+	var result []string
+	cptr := (**C.char)(C.gd_aliases(df.d, fcode))
+	if cptr == (**C.char)(C.NULL) {
+		return result, df.Error()
+	}
+
+	cstr0 := *cptr
+	INSANE := 10000
+	for i := 0; i < INSANE; i++ {
+		result = append(result, C.GoString(cstr0))
+		cptr = (**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(cptr)) + unsafe.Sizeof(cstr0)))
+		cstr0 = *cptr
+		if cstr0 == nullCString {
+			return result, nil
+		}
+	}
+	return result, nil
+
+}
+
+// NAliases returns the number of aliases of a given field code (always at least one).
+// Zero indicates an error
+func (df Dirfile) NAliases(fieldcode string) int {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return int(C.gd_naliases(df.d, fcode))
+
+}
+
 // NEntries returns the number of fields in the dirfile satisfying various criteria.
 func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint {
 	cparent := C.CString(parent)
