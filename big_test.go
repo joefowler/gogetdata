@@ -1354,7 +1354,23 @@ func TestRead(t *testing.T) {
 		t.Errorf("EoF returns %d, want 80", n118)
 	}
 
-	// TODO: #119-121
+	// #119: SetEncoding check
+	if err1 := frag1.SetEncoding(SIEENCODED, false); err != nil {
+		t.Error("Fragment.SetEncoding failed:", err1)
+	} else if frag1.Encoding() != SIEENCODED {
+		t.Errorf("Fragment.SetEncoding yielded encoding 0x%x, want 0x%x", frag1.Encoding(),
+			SIEENCODED)
+	}
+
+	// #120: SetEncoding check
+	if err1 := frag1.SetEndianness(BIGENDIAN, false); err != nil {
+		t.Error("Fragment.SetEndianness failed:", err1)
+	} else if frag1.Endianness() != BIGENDIAN {
+		t.Errorf("Fragment.SetEndianness yielded byte sex 0x%x, want 0x%x", frag1.Endianness(),
+			BIGENDIAN)
+	}
+
+	// TODO: #121
 
 	// #122: Dirfile.Delete check
 	err = d.Delete("new10", 0)
@@ -1377,7 +1393,23 @@ func TestRead(t *testing.T) {
 		}
 	}
 
-	// TODO: #127-128
+	// #127: FrameOffset check
+	frag, err = d.Fragment(0)
+	if err != nil {
+		t.Error("d.Fragment(0) failed:", err)
+	} else {
+		off := frag.FrameOffset()
+		if off != 0 {
+			t.Errorf("Fragment 0 has FrameOffset()=%d, want 0", off)
+		}
+
+		// #128: SetFrameOffset check
+		frag.SetFrameOffset(33, false)
+		off = frag.FrameOffset()
+		if off != 33 {
+			t.Errorf("Fragment 0 has FrameOffset()=%d, want 33", off)
+		}
+	}
 
 	// #129: NativeType check
 	nt129 := d.NativeType("data")
@@ -1401,12 +1433,12 @@ func TestRead(t *testing.T) {
 
 	// #133: Framenum check
 	f133 := d.Framenum("data", 52.5)
-	if math.Abs(f133-6.4375) > 1e-5 {
-		t.Errorf("Framenum returns %.5g, want %.5g", f133, 6.4375)
+	if math.Abs(f133-39.4375) > 1e-5 {
+		t.Errorf("Framenum returns %.5g, want %.5g", f133, 39.4375)
 	}
 	f133s := d.FramenumSubset("data", 52.5, 6, 0)
-	if math.Abs(f133s-6.4375) > 1e-5 {
-		t.Errorf("Framenum returns %.5g, want %.5g", f133s, 6.4375)
+	if math.Abs(f133s-39.4375) > 1e-5 {
+		t.Errorf("Framenum returns %.5g, want %.5g", f133s, 39.4375)
 	}
 
 	// TODO: all checks after #133
@@ -1437,9 +1469,8 @@ func TestRead(t *testing.T) {
 	}
 
 	// #142: BoF check
-	// TODO: expect 264 once all tests in place
-	if n142 := d.BoF("lincom"); n142 != 0 {
-		t.Errorf("BoF returns %d, want 0", n142)
+	if n142 := d.BoF("lincom"); n142 != 264 {
+		t.Errorf("BoF returns %d, want 264", n142)
 	}
 
 	// #147: Recip check
@@ -1854,22 +1885,39 @@ func TestRead(t *testing.T) {
 
 	// #223: IncludeAffix checks
 	flags223 := CREAT | EXCL
-	const prefix1 string = "A"
-	const suffix1 string = "Z"
+	var prefix1 string = "A"
+	var suffix1 string = "Z"
 	if _, err = d.IncludeAffix("format1", 0, prefix1, suffix1, flags223); err != nil {
 		t.Error("IncludeAffix fails:", err)
 	}
 
 	// #226: Fragment affixes checks
-	if frag226, err1 := d.Fragment(1); err1 != nil {
-		t.Error("Could not get Fragment(1) in test 226:", err1)
+	frag226, err := d.Fragment(1)
+	if err != nil {
+		t.Error("Could not get Fragment(1) in test 226:", err)
 	} else {
-		if frag226.prefix != prefix1 {
-			t.Errorf("Fragment(1) has prefix \"%s\", want \"%s\"", frag226.prefix, prefix1)
+		if frag226.Prefix() != prefix1 {
+			t.Errorf("Fragment(1) has prefix \"%s\", want \"%s\"", frag226.Prefix(), prefix1)
 		}
-		if frag226.suffix != suffix1 {
-			t.Errorf("Fragment(1) has suffix \"%s\", want \"%s\"", frag226.suffix, suffix1)
+		if frag226.Suffix() != suffix1 {
+			t.Errorf("Fragment(1) has suffix \"%s\", want \"%s\"", frag226.Suffix(), suffix1)
 		}
+	}
+
+	// #227: Change fragment prefix/suffix
+	prefix1 = "B"
+	if err = frag226.SetPrefix(prefix1); err != nil {
+		t.Error("Fragment.SetPrefix failed:", err)
+	}
+	suffix1 = "C"
+	if err = frag226.SetSuffix(suffix1); err != nil {
+		t.Error("Fragment.SetSuffix failed:", err)
+	}
+	if frag226.Prefix() != prefix1 {
+		t.Errorf("Fragment(1) has prefix \"%s\", want \"%s\"", frag226.Prefix(), prefix1)
+	}
+	if frag226.Suffix() != suffix1 {
+		t.Errorf("Fragment(1) has suffix \"%s\", want \"%s\"", frag226.Suffix(), suffix1)
 	}
 
 	// #229: AddMplex check
