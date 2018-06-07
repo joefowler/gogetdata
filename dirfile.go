@@ -14,6 +14,8 @@ import (
 	"unsafe"
 )
 
+var nullCString *C.char = (*C.char)(C.NULL)
+
 // Dirfile wraps the GetData.DIRFILE opaque object.
 type Dirfile struct {
 	name string
@@ -41,7 +43,7 @@ func OpenDirfile(name string, flags Flags) (Dirfile, error) {
 // It uses C API gd_error_string to generate the underlying string.
 func (df *Dirfile) Error() error {
 	df.nerr += int(C.gd_error_count(df.d))
-	cmsg := C.gd_error_string(df.d, (*C.char)(C.NULL), 0)
+	cmsg := C.gd_error_string(df.d, nullCString, 0)
 	defer C.free(unsafe.Pointer(cmsg))
 	return errors.New(C.GoString(cmsg))
 }
@@ -101,7 +103,7 @@ func (df *Dirfile) Flush(fieldcode string) error {
 // FlushAll will flush and close file descriptors associated with all fields.
 // Use Dirfile.Flush("fieldname") to flush and close only one field.
 func (df *Dirfile) FlushAll() error {
-	errcode := C.gd_flush(df.d, (*C.char)(C.NULL))
+	errcode := C.gd_flush(df.d, nullCString)
 	if errcode != C.GD_E_OK {
 		return df.Error()
 	}
@@ -125,7 +127,7 @@ func (df *Dirfile) Sync(fieldcode string) error {
 // SyncAll will flush file descriptors associated with all fields without closing them.
 // Use Dirfile.Sync("fieldname") to flush only one field.
 func (df *Dirfile) SyncAll() error {
-	errcode := C.gd_sync(df.d, (*C.char)(C.NULL))
+	errcode := C.gd_sync(df.d, nullCString)
 	if errcode != C.GD_E_OK {
 		return df.Error()
 	}
@@ -149,7 +151,7 @@ func (df *Dirfile) RawClose(fieldcode string) error {
 // RawCloseAll will close file descriptors associated with all fields without flushing them.
 // Use Dirfile.RawClose("fieldname") to close only one field.
 func (df *Dirfile) RawCloseAll() error {
-	errcode := C.gd_raw_close(df.d, (*C.char)(C.NULL))
+	errcode := C.gd_raw_close(df.d, nullCString)
 	if errcode != C.GD_E_OK {
 		return df.Error()
 	}
@@ -425,7 +427,7 @@ func (df Dirfile) GetSarraySlice(fieldcode string, start, n int) ([]string, erro
 	cstr0 := *cptr
 	sarray := make([]string, n)
 	for i := 0; i < n; i++ {
-		if cstr0 == (*C.char)(C.NULL) {
+		if cstr0 == nullCString {
 			break
 		}
 		sarray[i] = C.GoString(cstr0)
@@ -444,7 +446,7 @@ func (df Dirfile) Sarrays() ([][]string, error) {
 
 	var result [][]string
 	list1end := (**C.char)(C.NULL)
-	list0end := (*C.char)(C.NULL)
+	list0end := nullCString
 	INSANE := 10000
 	for i := 0; i < INSANE; i++ {
 		clist1 := *cptr
@@ -478,7 +480,7 @@ func (df Dirfile) MSarrays(parent string) ([][]string, error) {
 
 	var result [][]string
 	list1end := (**C.char)(C.NULL)
-	list0end := (*C.char)(C.NULL)
+	list0end := nullCString
 	INSANE := 10000
 	for i := 0; i < INSANE; i++ {
 		clist1 := *cptr
@@ -522,7 +524,7 @@ func (df Dirfile) Strings() ([]string, error) {
 	}
 
 	var result []string
-	listend := (*C.char)(C.NULL)
+	listend := nullCString
 	cstr0 := *cptr
 	INSANE := 10000
 	for i := 0; i < INSANE; i++ {
@@ -547,7 +549,7 @@ func (df Dirfile) MStrings(parent string) ([]string, error) {
 	}
 
 	var result []string
-	listend := (*C.char)(C.NULL)
+	listend := nullCString
 	cstr0 := *cptr
 	INSANE := 10000
 	for i := 0; i < INSANE; i++ {
@@ -760,7 +762,7 @@ func (df Dirfile) LinterpTablename(fieldcode string) (string, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
 	result := C.gd_linterp_tablename(df.d, fcode)
-	if result == (*C.char)(C.NULL) {
+	if result == nullCString {
 		return "", df.Error()
 	}
 	return C.GoString(result), nil
@@ -771,7 +773,7 @@ func (df Dirfile) Filename(fieldcode string) (string, error) {
 	fcode := C.CString(fieldcode)
 	defer C.free(unsafe.Pointer(fcode))
 	result := C.gd_raw_filename(df.d, fcode)
-	if result == (*C.char)(C.NULL) {
+	if result == nullCString {
 		return "", df.Error()
 	}
 	return C.GoString(result), nil
@@ -848,7 +850,7 @@ func (df Dirfile) NEntries(parent string, etype EntryType, flags EntryType) uint
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return uint(C.gd_nentries(df.d, cparent, C.int(etype), C.uint(flags)))
 }
@@ -874,7 +876,7 @@ func (df Dirfile) NMFields(parent string) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return uint(C.gd_nmfields(df.d, cparent))
 }
@@ -885,7 +887,7 @@ func (df Dirfile) NMVectors(parent string) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return uint(C.gd_nmvectors(df.d, cparent))
 }
@@ -896,7 +898,7 @@ func (df Dirfile) NMFieldsByType(parent string, etype EntryType) uint {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return uint(C.gd_nmfields_by_type(df.d, cparent, C.gd_entype_t(etype)))
 }
@@ -930,7 +932,7 @@ func (df Dirfile) EntryList(parent string, et EntryType, flags EntryType) []stri
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_entry_list(df.d, cparent, C.int(et), C.uint(flags))))
 }
@@ -955,7 +957,7 @@ func (df Dirfile) MFieldList(parent string) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_mfield_list(df.d, cparent)))
 }
@@ -965,7 +967,7 @@ func (df Dirfile) MVectorList(parent string) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return ppchar2stringSlice(unsafe.Pointer(C.gd_mvector_list(df.d, cparent)))
 }
@@ -975,7 +977,7 @@ func (df Dirfile) MFieldListByType(parent string, et EntryType) []string {
 	cparent := C.CString(parent)
 	defer C.free(unsafe.Pointer(cparent))
 	if len(parent) == 0 {
-		cparent = (*C.char)(C.NULL)
+		cparent = nullCString
 	}
 	return ppchar2stringSlice(unsafe.Pointer(
 		C.gd_mfield_list_by_type(df.d, cparent, C.gd_entype_t(et))))
