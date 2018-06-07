@@ -1262,6 +1262,10 @@ func TestRead(t *testing.T) {
 	if err != nil {
 		t.Error("Could not run Dirfile.Entry(\"new1\"):", err)
 	} else {
+		det := d.EntryType(e99.name)
+		if e99.fieldType != det {
+			t.Errorf("Dirfile.EntryType returned 0x%x, want 0x%x", det, e99.fieldType)
+		}
 		// TODO Finish check
 	}
 
@@ -1729,6 +1733,34 @@ func TestRead(t *testing.T) {
 	} else {
 		if n204 != 8*location203+8 {
 			t.Errorf("Tell returned %d, want %d", n204, 8*location203+8)
+		}
+	}
+
+	// #205: Hide check
+	if err1 := d.Hide("data"); err1 != nil {
+		t.Error("Could not call Hide(data):", err)
+	}
+
+	// #206: Hidden check
+	if h206, err1 := d.Hidden("data"); err1 != nil {
+		t.Error("Could not call Hidden(data) in test 206:", err)
+	} else if !h206 {
+		t.Error("Hidden(data) returned false, want true")
+	}
+	if h206, err1 := d.Hidden("lincom"); err1 != nil {
+		t.Error("Could not call Hidden(lincom) in test 206:", err)
+	} else if h206 {
+		t.Error("Hidden(lincom) returned true, want false")
+	}
+
+	// #207: Unhide check
+	if err1 := d.Unhide("data"); err1 != nil {
+		t.Error("Could not call Hidden(data):", err)
+	} else {
+		if h207, err1 := d.Hidden("data"); err1 != nil {
+			t.Error("Could not call Hidden(data) in test 207:", err)
+		} else if h207 {
+			t.Error("Hidden(data) returned true, want false")
 		}
 	}
 

@@ -208,6 +208,9 @@ func BitEntry(name, inField string, bitnum, numbits, fragmentIndex int) Entry {
 	return e
 }
 
+// Filename returns the raw dirfile's filename
 func (e Entry) Filename() (string, error) {
 	return e.df.Filename(e.name)
 }
+
+// func (e *Entry) SetType(t RetType)

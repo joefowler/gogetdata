@@ -813,6 +813,13 @@ func (df *Dirfile) Entry(fieldcode string) (Entry, error) {
 	return entry, nil
 }
 
+// EntryType returns the EntryType for the named field.
+func (df Dirfile) EntryType(fieldcode string) EntryType {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	return EntryType(C.gd_entry_type(df.d, fcode))
+}
+
 // FragmentIndex returns the index of the fragment which defines a given field or alias
 func (df Dirfile) FragmentIndex(fieldcode string) (int, error) {
 	fcode := C.CString(fieldcode)
@@ -857,6 +864,17 @@ func (df Dirfile) Validate(fieldcode string) error {
 		return df.Error()
 	}
 	return nil
+}
+
+// Hidden returns whether a given field code is hidden or not
+func (df Dirfile) Hidden(fieldcode string) (bool, error) {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_hidden(df.d, fcode)
+	if result < 0 {
+		return false, df.Error()
+	}
+	return result > 0, nil
 }
 
 // NEntries returns the number of fields in the dirfile satisfying various criteria.
@@ -1447,6 +1465,28 @@ func (df *Dirfile) Delete(fieldname string, flags DeleteFlags) error {
 	fcode := C.CString(fieldname)
 	defer C.free(unsafe.Pointer(fcode))
 	result := C.gd_delete(df.d, fcode, C.uint(flags))
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// Hide changes the given field to hidden
+func (df *Dirfile) Hide(fieldcode string) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_hide(df.d, fcode)
+	if result < 0 {
+		return df.Error()
+	}
+	return nil
+}
+
+// Unhide changes the given field to not hidden
+func (df *Dirfile) Unhide(fieldcode string) error {
+	fcode := C.CString(fieldcode)
+	defer C.free(unsafe.Pointer(fcode))
+	result := C.gd_unhide(df.d, fcode)
 	if result < 0 {
 		return df.Error()
 	}
