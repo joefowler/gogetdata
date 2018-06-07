@@ -1382,7 +1382,49 @@ func TestRead(t *testing.T) {
 		t.Error("Loaded entry new10 after it was deleted in test 122:", err)
 	}
 
-	// TODO: #123-125
+	// TODO: #123
+
+	// #124: Entry.Move check
+	e124, err := d.Entry("new9")
+	if err != nil {
+		t.Error("d.Entry(\"new9\") failed:", err)
+	} else if err1 := e124.Move(1, 0); err != nil {
+		t.Error("Entry.Move(1,0) failed:", err1)
+	} else {
+		if e124.fragment != 1 {
+			t.Errorf("Entry.Move resulted in fragment %d, want 1", e124.fragment)
+		}
+	}
+
+	// #125: Entry.Rename check
+	if err1 := e124.Rename("newer", 0); err1 != nil {
+		t.Error("Entry.Rename failed:", err1)
+	} else {
+		if _, err2 := d.Entry("new9"); err2 == nil {
+			t.Error("Entry new9 still exists after rename, want error")
+		}
+		if e125, err2 := d.Entry("newer"); err2 != nil {
+			t.Error("Entry newer doesn't exist after rename:", err2)
+		} else {
+			if e125.fieldType != MULTIPLYENTRY {
+				t.Errorf("Entry newer is type 0x%x, want MULTIPLY=0x%x", e125.fieldType, MULTIPLYENTRY)
+			}
+			if e125.fragment != 1 {
+				t.Errorf("Entry newer is in fragment %d, want 1", e125.fragment)
+			}
+			expect := []string{"in1", "in2"}
+			// expect := []string{"in4", "in5"} // TODO: use this after implement test 107.
+			if len(e125.inFields) < len(expect) {
+				t.Errorf("Entry newer has %d inFields, want at least %d", len(e125.inFields), len(expect))
+			} else {
+				for i, e := range expect {
+					if e125.inFields[i] != e {
+						t.Errorf("Entry newer inFields[%d]=%s, want %s", i, e125.inFields[i], e)
+					}
+				}
+			}
+		}
+	}
 
 	// #126 Uninclude check
 	if err = d.Uninclude(1, false); err != nil {
@@ -1992,8 +2034,8 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.NEntries counts %d SCALAR entries, want 4", ne)
 	}
 	ne = d.NEntries("", VECTORENTRIES, HIDDENENTRIES|NOALIASENTRIES)
-	if ne != 28 {
-		t.Errorf("d.NEntries counts %d VECTOR entries, want 28", ne)
+	if ne != 27 {
+		t.Errorf("d.NEntries counts %d VECTOR entries, want 27", ne)
 	}
 
 	// #239: EntryList check
@@ -2002,7 +2044,7 @@ func TestRead(t *testing.T) {
 		t.Errorf("d.EntryList return %d entries, want %d", len(entryList), ne)
 	} else {
 		trueEntries := []string{"bit", "div", "data", "mult", "new1", "new2", "new3",
-			"new4", "new5", "new6", "new7", "new8", "new9", "sbit", "INDEX",
+			"new4", "new5", "new6", "new7", "new8", "sbit", "INDEX",
 			"indir", "mplex", "new14", "new15", "new16", "new18", "new21", "phase", "recip", "lincom",
 			"window", "linterp", "polynom"}
 		for i := 0; i < int(ne); i++ {

@@ -214,3 +214,30 @@ func (e Entry) Filename() (string, error) {
 }
 
 // func (e *Entry) SetType(t RetType)
+
+// Move moves this entry to a new fragment number
+func (e *Entry) Move(newfrag int, flags RenameFlags) error {
+	fcode := C.CString(e.name)
+	defer C.free(unsafe.Pointer(fcode))
+	cidx := C.int(newfrag)
+	result := C.gd_move(e.df.d, fcode, cidx, C.uint(flags))
+	if result < 0 {
+		return e.df.Error()
+	}
+	e.fragment = newfrag
+	return nil
+}
+
+// Rename renames this entry to the indicated name
+func (e *Entry) Rename(newname string, flags RenameFlags) error {
+	fcode := C.CString(e.name)
+	defer C.free(unsafe.Pointer(fcode))
+	ncode := C.CString(newname)
+	defer C.free(unsafe.Pointer(ncode))
+	result := C.gd_rename(e.df.d, fcode, ncode, C.uint(flags))
+	if result < 0 {
+		return e.df.Error()
+	}
+	e.name = newname
+	return nil
+}

@@ -275,3 +275,18 @@ const ZZSLIMENCODED Flags = C.GD_ZZSLIM_ENCODED
 
 // FLACENCODED means raw data are FLAC encoded
 const FLACENCODED Flags = C.GD_FLAC_ENCODED
+
+// RenameFlags are used in Entry.Move and Entry.Rename
+type RenameFlags uint
+
+// RENAMEDANGLE means don't update ALIAS entries, but turn them into dangling aliases
+const RENAMEDANGLE RenameFlags = C.GD_REN_DANGLE
+
+// RENAMEDATA if renaming a RAW field, also rename the data file on disk
+const RENAMEDATA RenameFlags = C.GD_REN_DATA
+
+// RENAMEFORCE means instead of having the call fail, just skip updating field codes which would become invalid
+const RENAMEFORCE RenameFlags = C.GD_REN_FORCE
+
+// RENAMEUPDATEDB means update references to the renamed field to use its new name
+const RENAMEUPDATEDB RenameFlags = C.GD_REN_UPDB
